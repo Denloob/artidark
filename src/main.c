@@ -20,9 +20,7 @@ int main(void)
 
     Character character = {.hitbox = {0, 0, 100, 100}, .velocity = {0, 0}};
     Level *level = level_create();
-    level_add_tile(
-        level,
-        *tile_create((SDL_FRect){0, 500, WINDOW_WIDTH, WINDOW_HEIGHT}, true));
+    level_add_tile(level, (Tile){.hitbox = {0, 500, 50, WINDOW_HEIGHT}, .solid=true});
 
     while (1)
     {
