@@ -39,7 +39,7 @@ int main(void)
         }
 
         character_applyGravity(&character, GRAVITY);
-        character_tick(&character, level->tiles);
+        character_tick(&character, level->tiles, MAX_ACCELERATION);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
         character_draw(&character, renderer);

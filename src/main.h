@@ -12,3 +12,7 @@
 #define FRAME_DURATION (1000 / FPS)
 
 #define GRAVITY 0.9
+
+// NOTE: should not be larger than the smallest solid tile size.
+// Otherwise the player will be able to clip trough it.
+#define MAX_ACCELERATION 3

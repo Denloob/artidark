@@ -4,13 +4,22 @@
 #include "vec.h"
 #include <stddef.h>
 
+void character_clamp_velocity(Character *character, float max_velocity)
+{
+    _character_clamp_velocity_on_axis(character, x, max_velocity);
+    _character_clamp_velocity_on_axis(character, y, max_velocity);
+}
+
 void character_draw(const Character *character, SDL_Renderer *renderer)
 {
     SDL_RenderDrawRectF(renderer, &character->hitbox);
 }
 
-void character_tick(Character *character, const VecTile tiles)
+void character_tick(Character *character, const VecTile tiles,
+                    float max_acceleration)
 {
+    character_clamp_velocity(character, max_acceleration);
+
     character_move(character, tiles);
 }
 

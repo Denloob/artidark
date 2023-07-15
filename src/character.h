@@ -35,6 +35,24 @@ typedef struct Character
         vector_free(collisions);                                               \
     }
 
+/** Clamps the velocity of character on given axis between -max_velocity and
+ *      +max_velocity.
+ */
+#define _character_clamp_velocity_on_axis(character, axis, max_velocity)       \
+    {                                                                          \
+        (character->velocity).axis = SDL_clamp((character->velocity).axis,     \
+                                               -max_velocity, max_velocity);   \
+    }
+
+/**
+ * @brief Clamps the velocity of the character between -max_velocity and
+ *          +max_velocity.
+ *
+ * @param max_velocity The maximum velocity the character can have in any
+ *                      direction.
+ */
+void character_clamp_velocity(Character *character, float max_velocity);
+
 /**
  * @brief Draws the character.
  *
@@ -43,11 +61,13 @@ typedef struct Character
 void character_draw(const Character *character, SDL_Renderer *renderer);
 
 /**
- * @brief Updates character's fields.
+ * @brief Updates character's fields and ensures they all are valid.
  *
  * @param tiles The tiles surrounding the character.
+ * @param max_acceleration The maximum acceleration the character can have.
  */
-void character_tick(Character *character, const VecTile tiles);
+void character_tick(Character *character, const VecTile tiles,
+                    float max_acceleration);
 
 /**
  * @brief Moves the character as needed and checks that the character doesn't
