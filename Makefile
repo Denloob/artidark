@@ -3,8 +3,8 @@ BIN_DIR = bin
 DEP_DIR = .deps
 
 CC = gcc
-CFLAGS = -g -Wall -Wextra -Wno-language-extension-token -pedantic -std=gnu2x $(shell sdl2-config --cflags) -I$(SRC_DIR)
-LDFLAGS = $(shell sdl2-config --libs) -lm
+CFLAGS = -g -Wall -Wextra -Wno-language-extension-token -pedantic -std=gnu2x $(shell pkg-config --cflags sdl2) -I$(SRC_DIR)
+LDFLAGS = $(shell pkg-config --libs sdl2) -lm
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
 
 TARGET = game
