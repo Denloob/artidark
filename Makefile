@@ -3,7 +3,7 @@ BIN_DIR = bin
 DEP_DIR = .deps
 
 CC = gcc
-CFLAGS = -g -Wall -Wextra -pedantic -std=gnu17 $(shell sdl2-config --cflags) -I$(SRC_DIR)
+CFLAGS = -g -Wall -Wextra -pedantic -std=gnu2x $(shell sdl2-config --cflags) -I$(SRC_DIR)
 LDFLAGS = $(shell sdl2-config --libs) -lm
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
 
