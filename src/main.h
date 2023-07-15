@@ -16,4 +16,4 @@
 // NOTE: should not be larger than the smallest solid tile size + shortest
 //          character hitbox.
 // Otherwise the character will be able to clip trough it.
-#define MAX_ACCELERATION 3
+#define MAX_ACCELERATION 20
