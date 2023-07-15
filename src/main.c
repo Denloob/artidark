@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "character.h"
+#include "level.h"
 #include "main.h"
 #include "renderer.h"
 #include <stdlib.h>
@@ -18,6 +19,10 @@ int main(void)
     }
 
     Character character = {.hitbox = {0, 0, 100, 100}, .velocity = {0, 0}};
+    Level *level = level_create();
+    level_add_tile(
+        level,
+        *tile_create((SDL_FRect){0, 500, WINDOW_WIDTH, WINDOW_HEIGHT}, true));
 
     while (1)
     {
@@ -36,7 +41,7 @@ int main(void)
         }
 
         character_applyGravity(&character, GRAVITY);
-        character_tick(&character);
+        character_tick(&character, level->tiles);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
         character_draw(&character, renderer);
