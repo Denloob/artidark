@@ -11,4 +11,4 @@
 
 #define FRAME_DURATION (1000 / FPS)
 
-#define GRAVITY 2
+#define GRAVITY 0.9
