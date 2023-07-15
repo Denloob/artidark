@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include "character.h"
 #include "main.h"
 #include "renderer.h"
 #include <stdlib.h>
@@ -16,6 +17,8 @@ int main(void)
         return EXIT_FAILURE;
     }
 
+    Character character = {.hitbox = {0, 0, 100, 100}, .velocity = {0, 0}};
+
     while (1)
     {
         SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
@@ -31,6 +34,12 @@ int main(void)
                 return EXIT_SUCCESS;
             }
         }
+
+        character_applyGravity(&character, GRAVITY);
+        character_tick(&character);
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
+        character_draw(&character, renderer);
 
         SDL_RenderPresent(renderer);
 
