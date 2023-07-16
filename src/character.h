@@ -8,6 +8,7 @@ typedef struct Character
 {
     SDL_FRect hitbox;
     SDL_FPoint velocity;
+    SDL_Texture *texture;
 } Character;
 
 /**
@@ -43,6 +44,25 @@ typedef struct Character
         (character->velocity).axis = SDL_clamp((character->velocity).axis,     \
                                                -max_velocity, max_velocity);   \
     }
+
+/**
+ * @brief Creates a character
+ *
+ * @param texture The texture of the character.
+ * @warning The caller is responsible for managing the texture.
+ *
+ * @param hitbox The hitbox of the character. If width or height is 0, they are
+ *                  determined by the texture.
+ *               When drawing, the texture will be stretched to fit the hitbox.
+ * @return The created character
+ */
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox);
+
+/**
+ * @brief Destroys the character
+ * @warning Doesn't destroy the texture.
+ */
+void character_destroy(Character *character);
 
 /**
  * @brief Clamps the velocity of the character between -max_velocity and

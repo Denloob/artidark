@@ -4,6 +4,34 @@
 #include "vec.h"
 #include <stddef.h>
 
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox)
+{
+    Character *character = malloc(sizeof(*character));
+
+    character->texture = texture;
+
+    if (hitbox.w == 0 || hitbox.h == 0)
+    {
+        int w, h;
+        SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+
+        if (hitbox.w == 0)
+            hitbox.w = w;
+        if (hitbox.h == 0)
+            hitbox.h = h;
+    }
+
+    character->hitbox = hitbox;
+    character->velocity = (SDL_FPoint){0, 0};
+
+    return character;
+}
+
+void character_destroy(Character *character)
+{
+    free(character);
+}
+
 void character_clamp_velocity(Character *character, float max_velocity)
 {
     _character_clamp_velocity_on_axis(character, x, max_velocity);
@@ -12,7 +40,7 @@ void character_clamp_velocity(Character *character, float max_velocity)
 
 void character_draw(const Character *character, SDL_Renderer *renderer)
 {
-    SDL_RenderDrawRectF(renderer, &character->hitbox);
+    SDL_RenderCopyF(renderer, character->texture, NULL, &character->hitbox);
 }
 
 void character_tick(Character *character, const VecTile tiles,
