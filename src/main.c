@@ -8,13 +8,15 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        fprintf(stderr, "Usage: %s <Character Texture Path>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <Character Texture Path> <Tile Path>\n",
+                argv[0]);
         return EXIT_FAILURE;
     }
 
     const char *texture_path = argv[1];
+    const char *tile_path = argv[2];
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
@@ -29,7 +31,8 @@ int main(int argc, char *argv[])
     }
 
     SDL_Texture *character_texture = IMG_LoadTexture(renderer, texture_path);
-    if (!character_texture)
+    SDL_Texture *tile_texture = IMG_LoadTexture(renderer, tile_path);
+    if (!character_texture || !tile_texture)
     {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -42,7 +45,11 @@ int main(int argc, char *argv[])
     Character *character =
         character_create(character_texture, (SDL_FRect){0, 0, w * 10, h * 10});
     Level *level = level_create();
-    level_add_tile(level, (Tile){.hitbox = {0, 500, 50, 16}, .solid = true});
+
+    SDL_QueryTexture(tile_texture, NULL, NULL, &w, &h);
+    level_add_tile(level, (Tile){.hitbox = {0, 500, w * 10, h * 10},
+                                 .solid = true,
+                                 .texture = tile_texture});
 
     while (1)
     {
@@ -57,6 +64,7 @@ int main(int argc, char *argv[])
                 level_destroy(level);
                 character_destroy(character);
                 SDL_DestroyTexture(character_texture);
+                SDL_DestroyTexture(tile_texture);
                 SDL_DestroyWindow(window);
                 SDL_DestroyRenderer(renderer);
                 return EXIT_SUCCESS;
@@ -67,8 +75,9 @@ int main(int argc, char *argv[])
         character_tick(character, level->tiles, MAX_ACCELERATION);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
-        character_draw(character, renderer);
+        level_draw(level, renderer);
 
+        character_draw(character, renderer);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(FRAME_DURATION);

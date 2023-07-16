@@ -4,5 +4,5 @@
 
 void tile_draw(const Tile *tile, SDL_Renderer *renderer)
 {
-    SDL_RenderDrawRectF(renderer, &tile->hitbox);
+    SDL_RenderCopyF(renderer, tile->texture, NULL, &tile->hitbox);
 }

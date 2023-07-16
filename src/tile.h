@@ -6,6 +6,7 @@
 typedef struct Tile
 {
     SDL_FRect hitbox;
+    SDL_Texture *texture;
     bool solid;
 } Tile;
 
