@@ -39,7 +39,7 @@ typedef struct Character
 /** Clamps the velocity of character on given axis between -max_velocity and
  *      +max_velocity.
  */
-#define _character_clamp_velocity_on_axis(character, axis, max_velocity)       \
+#define character_clampVelocityOnAxis(character, axis, max_velocity)           \
     {                                                                          \
         (character->velocity).axis = SDL_clamp((character->velocity).axis,     \
                                                -max_velocity, max_velocity);   \

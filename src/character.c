@@ -35,8 +35,8 @@ void character_destroy(Character *character)
 
 void character_clamp_velocity(Character *character, float max_velocity)
 {
-    _character_clamp_velocity_on_axis(character, x, max_velocity);
-    _character_clamp_velocity_on_axis(character, y, max_velocity);
+    character_clampVelocityOnAxis(character, x, max_velocity);
+    character_clampVelocityOnAxis(character, y, max_velocity);
 }
 
 void character_draw(const Character *character, SDL_Renderer *renderer)
