@@ -1,11 +1,14 @@
 #pragma once
 
 #include "SDL.h"
-#include "tile.h"
+#include "level_layer.h"
+#include "tileset.h"
+
+#define LEVEL_LAYER_SEPARATOR '\\'
 
 typedef struct Level
 {
-    VecTile tiles;
+    VecLevelLayer layers;
 } Level;
 
 /**
@@ -23,11 +26,11 @@ Level *level_create(void);
 void level_destroy(Level *level);
 
 /**
- * @brief Adds a tile to the level.
+ * @brief Adds a layer to the level.
  *
- * @param tile The tile to add.
+ * @param layer The layer to add.
  */
-void level_add_tile(Level *level, Tile tile);
+void level_addLayer(Level *level, LevelLayer *layer);
 
 /**
  * @brief Draws the level.
@@ -35,3 +38,15 @@ void level_add_tile(Level *level, Tile tile);
  * @param renderer The renderer to draw onto.
  */
 void level_draw(const Level *level, SDL_Renderer *renderer);
+
+/**
+ * @brief Loads a level from a file.
+ *
+ * @param stream The stream to load level from.
+ * @param tileset The tileset to use for the textures.
+ * @param tileWidth The width of a tile in the level.
+ * @param tileHeight The height of a tile in the level.
+ * @return The loaded level.
+ */
+Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
+                  int tileHeight);

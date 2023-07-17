@@ -4,52 +4,63 @@
 #include "level.h"
 #include "main.h"
 #include "renderer.h"
+#include "utils.h"
 #include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 5)
     {
-        fprintf(stderr, "Usage: %s <Character Texture Path> <Tile Path>\n",
-                argv[0]);
-        return EXIT_FAILURE;
+        die("Usage: %s <Character Texture Path> <Level Path> <Tileset "
+            "Path> <Textures path>",
+            argv[0]);
     }
 
-    const char *texture_path = argv[1];
-    const char *tile_path = argv[2];
+    const char *characterTexturePath = argv[1];
+    const char *levelPath = argv[2];
+    const char *tilesetPath = argv[3];
+    const char *texturesDirPath = argv[4];
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
     if (initSDL(&window, &renderer, WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
-    {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "initSDL()",
-                                 SDL_GetError(), 0);
-        SDL_DestroyRenderer(renderer);
-        SDL_Log("initSDL(): %s", SDL_GetError());
-        return EXIT_FAILURE;
-    }
+        die("Init SDL failed");
 
-    SDL_Texture *character_texture = IMG_LoadTexture(renderer, texture_path);
-    SDL_Texture *tile_texture = IMG_LoadTexture(renderer, tile_path);
-    if (!character_texture || !tile_texture)
-    {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Log("IMG_LoadTexture(): %s", SDL_GetError());
-        return EXIT_FAILURE;
-    }
+    FILE *tilesetFile = fopen(tilesetPath, "rb");
+
+    if (!tilesetFile)
+        die("Opening file %s failed", tilesetPath);
+
+    // tileset_load also could fail, so by this we check both
+    Tileset *tileset =
+        tileset_load(tilesetFile, strdup(texturesDirPath), renderer);
+
+    fclose(tilesetFile);
+
+    if (!tileset)
+        die("Loading tileset %s failed", tilesetPath);
+
+    SDL_Texture *characterTexture =
+        IMG_LoadTexture(renderer, characterTexturePath);
+    if (!characterTexture)
+        die("Loading %s failed", characterTexturePath);
+
     int w, h;
-    SDL_QueryTexture(character_texture, NULL, NULL, &w, &h);
+    SDL_QueryTexture(characterTexture, NULL, NULL, &w, &h);
 
     Character *character =
-        character_create(character_texture, (SDL_FRect){0, 0, w * 10, h * 10});
-    Level *level = level_create();
+        character_create(characterTexture, (SDL_FRect){0, 0, w, h});
 
-    SDL_QueryTexture(tile_texture, NULL, NULL, &w, &h);
-    level_add_tile(level, (Tile){.hitbox = {0, 500, w * 10, h * 10},
-                                 .solid = true,
-                                 .texture = tile_texture});
+    FILE *levelFile = fopen(levelPath, "rb");
+    if (!levelFile)
+        die("Opening %s failed", levelPath);
+
+    Level *level = level_load(levelFile, tileset, 16, 16);
+    if (!level)
+        die("Loading level %s failed", levelPath);
+    fclose(levelFile);
 
     while (1)
     {
@@ -63,16 +74,17 @@ int main(int argc, char *argv[])
             {
                 level_destroy(level);
                 character_destroy(character);
-                SDL_DestroyTexture(character_texture);
-                SDL_DestroyTexture(tile_texture);
-                SDL_DestroyWindow(window);
+                tileset_destroy(tileset);
+                SDL_DestroyTexture(characterTexture);
                 SDL_DestroyRenderer(renderer);
+                SDL_DestroyWindow(window);
+                SDL_Quit();
                 return EXIT_SUCCESS;
             }
         }
 
         character_applyGravity(character, GRAVITY);
-        character_tick(character, level->tiles, MAX_ACCELERATION);
+        character_tick(character, level->layers[0]->tiles, MAX_ACCELERATION);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
         level_draw(level, renderer);
