@@ -78,8 +78,8 @@ VecTile *character_findCollisions(const Character *character,
             SDL_HasIntersectionF(&character->hitbox, &tiles[i].hitbox))
         {
             // We need the no-lint because vector_add uses sizeof, and as our
-            // vector is vector of pointers, so we do sizeof pointer, the
-            // sizeof is marked as bugprone sizeof expression
+            // vector is vector of pointers, so we do sizeof pointer, which is
+            // marked as bugprone sizeof expression
 
             // NOLINTNEXTLINE(bugprone-sizeof-expression)
             vector_add(&collisions, &tiles[i]);
