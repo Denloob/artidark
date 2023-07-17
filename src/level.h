@@ -44,9 +44,10 @@ void level_draw(const Level *level, SDL_Renderer *renderer);
  *
  * @param stream The stream to load level from.
  * @param tileset The tileset to use for the textures.
- * @param tileWidth The width of a tile in the level.
- * @param tileHeight The height of a tile in the level.
+ * @param tileWidth The width of a tile in the level (before scaling).
+ * @param tileHeight The height of a tile in the level (before scaling).
+ * @param scalingFactor The scaling factor to apply to each tile.
  * @return The loaded level.
  */
 Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
-                  int tileHeight);
+                  int tileHeight, int scalingFactor);

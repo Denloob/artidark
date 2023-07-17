@@ -5,7 +5,7 @@
 #include "vec.h"
 #include <stddef.h>
 
-Character *character_create(SDL_Texture *texture, SDL_FRect hitbox)
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingFactor)
 {
     Character *character = xmalloc(sizeof(*character));
 
@@ -21,6 +21,9 @@ Character *character_create(SDL_Texture *texture, SDL_FRect hitbox)
         if (hitbox.h == 0)
             hitbox.h = h;
     }
+
+    hitbox.w *= scalingFator;
+    hitbox.h *= scalingFator;
 
     character->hitbox = hitbox;
     character->velocity = (SDL_FPoint){0, 0};

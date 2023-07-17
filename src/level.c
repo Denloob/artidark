@@ -66,6 +66,7 @@ struct LayerLoadingData
     SDL_Point currentPos;
     LevelLayer *currentLayer;
     const Tileset *tileset;
+    int scalingFactor;
 };
 
 void level_fieldParserCallback(void *fieldBytes,
@@ -80,15 +81,20 @@ void level_fieldParserCallback(void *fieldBytes,
     SDL_Texture *tileTexture =
         tileset_findTextureById(layerLoadingData->tileset, id);
 
+    int w, h;
+
+    SDL_QueryTexture(tileTexture, NULL, NULL, &w, &h);
+
     Tile tile;
     tile_init(&tile,
               (SDL_FRect){layerLoadingData->currentPos.x,
-                          layerLoadingData->currentPos.y, 0,
-                          0}, // TODO: instead of 0, it should be a param
+                          layerLoadingData->currentPos.y,
+                          w * layerLoadingData->scalingFactor,
+                          h * layerLoadingData->scalingFactor},
               tileTexture,
               tileTexture != NULL); // TODO: instead of false, calc it
 
-    layerLoadingData->currentPos.x += layerLoadingData->tileWidth;
+    layerLoadingData->currentPos.x += layerLoadingData->tileWidth * layerLoadingData->scalingFactor;
 
     level_layer_add_tile(layerLoadingData->currentLayer, tile);
 }
@@ -97,11 +103,11 @@ void level_rowParserCallback(int _ __attribute__((unused)), void *data)
 {
     struct LayerLoadingData *layerLoadingData = data;
     layerLoadingData->currentPos.x = 0;
-    layerLoadingData->currentPos.y += layerLoadingData->tileHeight;
+    layerLoadingData->currentPos.y += layerLoadingData->tileHeight * layerLoadingData->scalingFactor;
 }
 
 Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
-                  int tileHeight)
+                  int tileHeight, int scalingFactor)
 {
     struct csv_parser parser;
     if (csv_init(&parser, CSV_APPEND_NULL))
@@ -115,6 +121,7 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
     struct LayerLoadingData layerLoadingData = {.tileWidth = tileWidth,
                                                 .tileHeight = tileHeight,
                                                 .tileset = tileset,
+                                                .scalingFactor = scalingFactor,
                                                 .currentPos = (SDL_Point){0},
                                                 .currentLayer =
                                                     level_layer_create()};

@@ -52,11 +52,14 @@ typedef struct Character
  * @warning The caller is responsible for managing the texture.
  *
  * @param hitbox The hitbox of the character. If width or height is 0, they are
- *                  determined by the texture.
+ *                  determined by the texture. Scaling will be applied after
+ *                  calculations.
  *               When drawing, the texture will be stretched to fit the hitbox.
+ * @param scalingFactor The scaling factor to apply to the hitbox width and
+ *                      height.
  * @return The created character
  */
-Character *character_create(SDL_Texture *texture, SDL_FRect hitbox);
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingFactor);
 
 /**
  * @brief Destroys the character
