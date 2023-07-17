@@ -15,6 +15,8 @@
 
 #define SCALING_FACTOR 2
 
+#define TILE_SIZE 16
+
 // NOTE: should not be larger than the smallest solid tile size.
 // Otherwise the character will be able to clip trough it.
-#define MAX_ACCELERATION 20
+#define MAX_ACCELERATION (TILE_SIZE)

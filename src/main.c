@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     if (!levelFile)
         die("Opening %s failed", levelPath);
 
-    Level *level = level_load(levelFile, tileset, 16, 16, SCALING_FACTOR);
+    Level *level = level_load(levelFile, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
     if (!level)
         die("Loading level %s failed", levelPath);
     fclose(levelFile);
