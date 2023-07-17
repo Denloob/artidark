@@ -70,7 +70,7 @@ struct LayerLoadingData
 };
 
 void level_fieldParserCallback(void *fieldBytes,
-                                 size_t _ __attribute__((unused)), void *data)
+                               size_t _ __attribute__((unused)), void *data)
 {
     struct LayerLoadingData *layerLoadingData = data;
 
@@ -94,7 +94,8 @@ void level_fieldParserCallback(void *fieldBytes,
               tileTexture,
               tileTexture != NULL); // TODO: instead of false, calc it
 
-    layerLoadingData->currentPos.x += layerLoadingData->tileWidth * layerLoadingData->scalingFactor;
+    layerLoadingData->currentPos.x +=
+        layerLoadingData->tileWidth * layerLoadingData->scalingFactor;
 
     level_layer_add_tile(layerLoadingData->currentLayer, tile);
 }
@@ -103,7 +104,8 @@ void level_rowParserCallback(int _ __attribute__((unused)), void *data)
 {
     struct LayerLoadingData *layerLoadingData = data;
     layerLoadingData->currentPos.x = 0;
-    layerLoadingData->currentPos.y += layerLoadingData->tileHeight * layerLoadingData->scalingFactor;
+    layerLoadingData->currentPos.y +=
+        layerLoadingData->tileHeight * layerLoadingData->scalingFactor;
 }
 
 Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
@@ -154,8 +156,7 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
             layerLoadingData.currentLayer = level_layer_create();
             layerLoadingData.currentPos = (SDL_Point){0};
             if (csv_parse(&parser, nextLayerBuf, nextLayerBytesToParse,
-                          level_fieldParserCallback,
-                          level_rowParserCallback,
+                          level_fieldParserCallback, level_rowParserCallback,
                           &layerLoadingData) != bytesRead - bytesToParse)
             {
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
