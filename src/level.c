@@ -1,11 +1,12 @@
 #include "SDL.h"
 #include "level.h"
 #include "tile.h"
+#include "utils.h"
 #include "vec.h"
 
 Level *level_create(void)
 {
-    Level *level = malloc(sizeof(*level));
+    Level *level = xmalloc(sizeof(*level));
 
     level->tiles = vector_create();
 

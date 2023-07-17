@@ -1,12 +1,13 @@
 #include "SDL.h"
 #include "character.h"
 #include "tile.h"
+#include "utils.h"
 #include "vec.h"
 #include <stddef.h>
 
 Character *character_create(SDL_Texture *texture, SDL_FRect hitbox)
 {
-    Character *character = malloc(sizeof(*character));
+    Character *character = xmalloc(sizeof(*character));
 
     character->texture = texture;
 
