@@ -22,8 +22,8 @@ Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingF
             hitbox.h = h;
     }
 
-    hitbox.w *= scalingFator;
-    hitbox.h *= scalingFator;
+    hitbox.w *= scalingFactor;
+    hitbox.h *= scalingFactor;
 
     character->hitbox = hitbox;
     character->velocity = (SDL_FPoint){0, 0};
