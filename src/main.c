@@ -50,14 +50,15 @@ int main(int argc, char *argv[])
     int w, h;
     SDL_QueryTexture(characterTexture, NULL, NULL, &w, &h);
 
-    Character *character =
-        character_create(characterTexture, (SDL_FRect){0, 0, w, h}, SCALING_FACTOR);
+    Character *character = character_create(
+        characterTexture, (SDL_FRect){0, 0, w, h}, SCALING_FACTOR);
 
     FILE *levelFile = fopen(levelPath, "rb");
     if (!levelFile)
         die("Opening %s failed", levelPath);
 
-    Level *level = level_load(levelFile, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
+    Level *level =
+        level_load(levelFile, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
     if (!level)
         die("Loading level %s failed", levelPath);
     fclose(levelFile);
