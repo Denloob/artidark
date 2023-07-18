@@ -66,12 +66,6 @@ void character_tickMovement(Character *character, const VecTile tiles)
     character_fixTileClip(character, tiles, y, h);
 }
 
-void character_setVelocity(Character *character, float x, float y)
-{
-    character->velocity.x = x;
-    character->velocity.y = y;
-}
-
 void character_applyGravity(Character *character, float gravity)
 {
     character->velocity.y += gravity;
