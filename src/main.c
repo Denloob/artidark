@@ -63,7 +63,8 @@ int main(int argc, char *argv[])
         die("Loading level %s failed", levelPath);
     fclose(levelFile);
 
-    while (1)
+    bool done = false;
+    while (!done)
     {
         SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
         SDL_RenderClear(renderer);
@@ -74,14 +75,8 @@ int main(int argc, char *argv[])
             switch (event.type)
             {
                 case SDL_QUIT:
-                    level_destroy(level);
-                    character_destroy(character);
-                    tileset_destroy(tileset);
-                    SDL_DestroyTexture(characterTexture);
-                    SDL_DestroyRenderer(renderer);
-                    SDL_DestroyWindow(window);
-                    SDL_Quit();
-                    return EXIT_SUCCESS;
+                    done = true;
+                    break;
             }
         }
 
@@ -95,6 +90,14 @@ int main(int argc, char *argv[])
 
         SDL_Delay(FRAME_DURATION);
     }
+
+    level_destroy(level);
+    character_destroy(character);
+    tileset_destroy(tileset);
+    SDL_DestroyTexture(characterTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return EXIT_SUCCESS;
 }
