@@ -41,10 +41,12 @@ void tileset_entry_cleanup(TilesetEntry *entry);
  * @brief Creates a tileset from a csv stream.
  *
  * @param stream The csv stream where each row is `id,texturePath`.
- * @param textureDirPath The path to the texture directory.
+ * @param textureDirPath The path to the texture directory. (Managed by the tileset)
  * @see Tileset
  * @param renderer The renderer to use to load the textures.
  * @return The created tileset.
+ *
+ * @see tileset_destroy
  */
 Tileset *tileset_load(FILE *stream, char *textureDirPath,
                       SDL_Renderer *renderer);
@@ -52,14 +54,17 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
 /**
  * @brief Creates a tileset
  *
- * @param textureDirPath The path to the texture directory
+ * @param textureDirPath The path to the texture directory. (Managed by the tileset)
  * @see Tileset
  * @return The created tileset.
+ *
+ * @see tileset_destroy
  */
 Tileset *tileset_create(char *textureDirPath);
 
 /**
  * @brief Destroys a tileset.
+ * @warning Destroys the textures and frees the textureDirPath
  */
 void tileset_destroy(Tileset *tileset);
 

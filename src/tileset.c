@@ -34,6 +34,7 @@ void tileset_destroy(Tileset *tileset)
     }
 
     vector_free(tileset->entries);
+    free(tileset->textureDirPath);
 
     free(tileset);
 }
