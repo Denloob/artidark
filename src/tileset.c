@@ -77,7 +77,7 @@ struct TilesetLoadingData
 };
 
 void tileset_fieldParserCallback(void *fieldBytes,
-                                   size_t _ __attribute__((unused)), void *data)
+                                 size_t _ __attribute__((unused)), void *data)
 {
 
     struct TilesetLoadingData *tilesetLoadingData = data;
@@ -159,8 +159,8 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
         }
     }
 
-    csv_fini(&parser, tileset_fieldParserCallback,
-             tileset_rowParserCallback, &tilesetLoadingData);
+    csv_fini(&parser, tileset_fieldParserCallback, tileset_rowParserCallback,
+             &tilesetLoadingData);
     csv_free(&parser);
 
     // Pop the empty entry added by the loading algorithm
