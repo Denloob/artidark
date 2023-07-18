@@ -52,10 +52,10 @@ void character_tick(Character *character, const VecTile tiles,
 {
     character_clamp_velocity(character, max_acceleration);
 
-    character_move(character, tiles);
+    character_tickMovement(character, tiles);
 }
 
-void character_move(Character *character, const VecTile tiles)
+void character_tickMovement(Character *character, const VecTile tiles)
 {
     character->hitbox.x += character->velocity.x;
 

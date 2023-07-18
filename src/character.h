@@ -98,7 +98,7 @@ void character_tick(Character *character, const VecTile tiles,
  *
  * @param tiles The tiles surrounding the character.
  */
-void character_move(Character *character, const VecTile tiles);
+void character_tickMovement(Character *character, const VecTile tiles);
 
 /**
  * @brief Applies gravity to the character's velocity.
