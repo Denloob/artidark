@@ -78,26 +78,29 @@ void level_fieldParserCallback(void *fieldBytes,
     const char *fieldStr = fieldBytes;
     int id = atoi(fieldStr);
 
-    SDL_Texture *tileTexture =
-        tileset_findTextureById(layerLoadingData->tileset, id);
+    int w = 0, h = 0;
+    SDL_Texture *tileTexture = NULL;
+    bool solid = 0;
+    if (tileset_QueryTextureByID(layerLoadingData->tileset, id, &tileTexture,
+                                 &solid))
+    {
+        die("Error while loading level:\nNo texture with ID %d", id);
+    }
 
-    int w, h;
-
-    SDL_QueryTexture(tileTexture, NULL, NULL, &w, &h);
-
-    Tile tile;
-    tile_init(&tile,
-              (SDL_FRect){layerLoadingData->currentPos.x,
-                          layerLoadingData->currentPos.y,
-                          w * layerLoadingData->scalingFactor,
-                          h * layerLoadingData->scalingFactor},
-              tileTexture,
-              tileTexture != NULL); // TODO: instead of false, calc it
+    if (!SDL_QueryTexture(tileTexture, NULL, NULL, &w, &h))
+    {
+        Tile tile;
+        tile_init(&tile,
+                  (SDL_FRect){layerLoadingData->currentPos.x,
+                              layerLoadingData->currentPos.y,
+                              w * layerLoadingData->scalingFactor,
+                              h * layerLoadingData->scalingFactor},
+                  tileTexture, solid);
+        level_layer_add_tile(layerLoadingData->currentLayer, tile);
+    }
 
     layerLoadingData->currentPos.x +=
         layerLoadingData->tileWidth * layerLoadingData->scalingFactor;
-
-    level_layer_add_tile(layerLoadingData->currentLayer, tile);
 }
 
 void level_rowParserCallback(int _ __attribute__((unused)), void *data)

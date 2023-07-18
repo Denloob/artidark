@@ -6,6 +6,7 @@
 
 typedef struct TilesetEntry
 {
+    bool solid;
     int id;
     SDL_Texture *texture;
 } TilesetEntry;
@@ -64,8 +65,12 @@ void tileset_destroy(Tileset *tileset);
 
 /**
  * @brief Finds tile texture in a tileset using it's id.
+ *          If the out parameter is NULL, nothing will be written to it.
  *
  * @param id The id of the tile to find.
- * @return The texture of the tile.
+ * @param[out] texture The texture of the tile.
+ * @param[out] solid Whether the tile is solid or not.
+ * @return EXIT_SUCCESS if id exists, EXIT_FAILURE otherwise.
  */
-SDL_Texture *tileset_findTextureById(const Tileset *tileset, int id);
+int tileset_QueryTextureByID(const Tileset *tileset, int id,
+                             SDL_Texture **texture, bool *solid);

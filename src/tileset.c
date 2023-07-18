@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "vec.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 void tileset_entry_init(TilesetEntry *entry, int id, SDL_Texture *texture)
 {
@@ -64,7 +65,8 @@ char *concatPath(const char *path1, const char *path2, const char pathSeparator)
 enum FieldType
 {
     FIELD_ID,
-    FIELD_PATH
+    FIELD_PATH,
+    FIELD_SOLID,
 };
 
 struct TilesetLoadingData
@@ -102,6 +104,9 @@ void tileset_fieldParserCallback(void *fieldBytes,
             free(texturePath);
             break;
         }
+        case FIELD_SOLID:
+            lastEntry->solid = atoi(fieldStr) != 0;
+            break;
     }
 
     // Change type to the next field type, as the enum is in order.
@@ -166,15 +171,21 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
     return tilesetLoadingData.tileset;
 }
 
-SDL_Texture *tileset_findTextureById(const Tileset *tileset, int id)
+int tileset_QueryTextureByID(const Tileset *tileset, int id,
+                             SDL_Texture **texture, bool *solid)
 {
     for (size_t i = 0; i < vector_size(tileset->entries); i++)
     {
         if (tileset->entries[i].id == id)
         {
-            return tileset->entries[i].texture;
+            if (texture)
+                *texture = tileset->entries[i].texture;
+            if (solid)
+                *solid = tileset->entries[i].solid;
+
+            return EXIT_SUCCESS;
         }
     }
 
-    return NULL;
+    return EXIT_FAILURE;
 }
