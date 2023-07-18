@@ -5,7 +5,8 @@
 #include "vec.h"
 #include <stddef.h>
 
-Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingFactor)
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
+                            int scalingFactor)
 {
     Character *character = xmalloc(sizeof(*character));
 
@@ -27,6 +28,8 @@ Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingF
 
     character->hitbox = hitbox;
     character->velocity = (SDL_FPoint){0, 0};
+    character->movementDirection = 0;
+    character->speed = speed;
 
     return character;
 }
@@ -57,13 +60,60 @@ void character_tick(Character *character, const VecTile tiles,
 
 void character_tickMovement(Character *character, const VecTile tiles)
 {
+    float posBeforeMovement = character->hitbox.x;
     character->hitbox.x += character->velocity.x;
 
-    character_fixTileClip(character, tiles, x, w);
+    if (character->movementDirection & CHARACTER_MOVE_RIGHT)
+        character->hitbox.x += character->speed;
+    if (character->movementDirection & CHARACTER_MOVE_LEFT)
+        character->hitbox.x -= character->speed;
 
+    float movementDelta = character->hitbox.x - posBeforeMovement;
+    character_fixTileClip(character, tiles, movementDelta, x, w);
+
+    posBeforeMovement = character->hitbox.y;
     character->hitbox.y += character->velocity.y;
 
-    character_fixTileClip(character, tiles, y, h);
+    movementDelta = character->hitbox.y - posBeforeMovement;
+    character_fixTileClip(character, tiles, movementDelta, y, h);
+}
+
+void character_setMovement(Character *character,
+                           CharacterMovementDirection direction)
+{
+    character->movementDirection |= direction;
+}
+
+void character_unsetMovement(Character *character,
+                             CharacterMovementDirection direction)
+{
+    character->movementDirection &= ~direction;
+}
+
+void character_handleKeyboardEvent(Character *character,
+                                   SDL_KeyboardEvent *event)
+{
+    SDL_Keycode keycode = event->keysym.sym;
+    CharacterMovementDirection movementDirection = 0;
+    switch (keycode)
+    {
+        case SDLK_d:
+        case SDLK_RIGHT:
+            movementDirection = CHARACTER_MOVE_RIGHT;
+            break;
+        case SDLK_a:
+        case SDLK_LEFT:
+            movementDirection = CHARACTER_MOVE_LEFT;
+            break;
+        default:
+            return;
+    }
+
+    MovementFunction movementFunction = event->type == SDL_KEYDOWN
+                                            ? character_setMovement
+                                            : character_unsetMovement;
+
+    movementFunction(character, movementDirection);
 }
 
 void character_applyGravity(Character *character, float gravity)

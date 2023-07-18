@@ -20,3 +20,5 @@
 // NOTE: should not be larger than the smallest solid tile size.
 // Otherwise the character will be able to clip trough it.
 #define MAX_ACCELERATION (TILE_SIZE)
+
+#define CHARACTER_SPEED 3

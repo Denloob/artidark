@@ -50,8 +50,9 @@ int main(int argc, char *argv[])
     int w, h;
     SDL_QueryTexture(characterTexture, NULL, NULL, &w, &h);
 
-    Character *character = character_create(
-        characterTexture, (SDL_FRect){0, 0, w, h}, SCALING_FACTOR);
+    Character *character =
+        character_create(characterTexture, (SDL_FRect){0, 0, w, h},
+                         CHARACTER_SPEED, SCALING_FACTOR);
 
     FILE *levelFile = fopen(levelPath, "rb");
     if (!levelFile)
@@ -77,6 +78,9 @@ int main(int argc, char *argv[])
                 case SDL_QUIT:
                     done = true;
                     break;
+                case SDL_KEYDOWN:
+                case SDL_KEYUP:
+                    character_handleKeyboardEvent(character, &event.key);
             }
         }
 

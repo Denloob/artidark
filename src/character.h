@@ -3,32 +3,43 @@
 #include "SDL.h"
 #include "tile.h"
 #include "vec.h"
+#include <stdint.h>
+
+typedef uint8_t CharacterMovementDirection;
+
+#define CHARACTER_MOVE_LEFT (CharacterMovementDirection)0x01  // 0b01
+#define CHARACTER_MOVE_RIGHT (CharacterMovementDirection)0x02 // 0b10
 
 typedef struct Character
 {
     SDL_FRect hitbox;
     SDL_FPoint velocity;
     SDL_Texture *texture;
+    int speed;
+    CharacterMovementDirection movementDirection;
 } Character;
+
+typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
 
 /**
  * @brief Fixes character clipping through tile on one axis.
  *
  * @param tiles Tiles the character could be possibly clipped through.
+ * @param movementDelta Delta of player's movement.
  * @param posAxis `x` or `y`
  * @param sizeAxis `w` or `h`
  */
-#define character_fixTileClip(character, tiles, posAxis, sizeAxis)             \
+#define character_fixTileClip(character, tiles, movementDelta, posAxis,        \
+                              sizeAxis)                                        \
     {                                                                          \
         VecTile *collisions = character_findCollisions(character, tiles);      \
-        float direction = (character->velocity).posAxis;                       \
                                                                                \
         for (size_t i = 0; i < vector_size(collisions); i++)                   \
-            if (direction < 0)                                                 \
+            if (movementDelta < 0)                                             \
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis +                          \
                     (collisions[i]->hitbox).sizeAxis;                          \
-            else if (direction > 0)                                            \
+            else if (movementDelta > 0)                                        \
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis -                          \
                     (character->hitbox).sizeAxis;                              \
@@ -55,11 +66,13 @@ typedef struct Character
  *                  determined by the texture. Scaling will be applied after
  *                  calculations.
  *               When drawing, the texture will be stretched to fit the hitbox.
+ * @param speed The speed of the character.
  * @param scalingFactor The scaling factor to apply to the hitbox width and
  *                      height.
  * @return The created character
  */
-Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int scalingFactor);
+Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
+                            int scalingFactor);
 
 /**
  * @brief Destroys the character
@@ -99,6 +112,32 @@ void character_tick(Character *character, const VecTile tiles,
  * @param tiles The tiles surrounding the character.
  */
 void character_tickMovement(Character *character, const VecTile tiles);
+
+/**
+ * @brief Sets character's movement to the given direction, while keeping the
+ *          previous movement data.
+ *
+ * @param direction The direction to move to.
+ * @see CharacterMoveDirection
+ */
+void character_setMovement(Character *character,
+                           CharacterMovementDirection direction);
+
+/**
+ * @brief Un-sets character's movement to the given direction.
+ *
+ * @param direction The direction to unset.
+ */
+void character_unsetMovement(Character *character,
+                             CharacterMovementDirection direction);
+
+/**
+ * @brief Handles keyboard events (KEYDOWN / KEYUP) related to the character.
+ *
+ * @param event The keyboard event.
+ */
+void character_handleKeyboardEvent(Character *character,
+                                   SDL_KeyboardEvent *event);
 
 /**
  * @brief Applies gravity to the character's velocity.
