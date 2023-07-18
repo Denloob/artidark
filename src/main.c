@@ -71,16 +71,17 @@ int main(int argc, char *argv[])
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
+            switch (event.type)
             {
-                level_destroy(level);
-                character_destroy(character);
-                tileset_destroy(tileset);
-                SDL_DestroyTexture(characterTexture);
-                SDL_DestroyRenderer(renderer);
-                SDL_DestroyWindow(window);
-                SDL_Quit();
-                return EXIT_SUCCESS;
+                case SDL_QUIT:
+                    level_destroy(level);
+                    character_destroy(character);
+                    tileset_destroy(tileset);
+                    SDL_DestroyTexture(characterTexture);
+                    SDL_DestroyRenderer(renderer);
+                    SDL_DestroyWindow(window);
+                    SDL_Quit();
+                    return EXIT_SUCCESS;
             }
         }
 
