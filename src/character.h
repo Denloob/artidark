@@ -101,6 +101,14 @@ void character_tick(Character *character, const VecTile tiles,
 void character_tickMovement(Character *character, const VecTile tiles);
 
 /**
+ * @brief Sets the velocity of the character
+ *
+ * @param x The velocity on the x axis.
+ * @param y The velocity on the y axis.
+ */
+void character_setVelocity(Character *character, float x, float y);
+
+/**
  * @brief Applies gravity to the character's velocity.
  *
  * @param gravity The acceleration of gravity.
