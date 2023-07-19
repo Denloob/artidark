@@ -35,6 +35,7 @@ typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
         VecTile *collisions = character_findCollisions(character, tiles);      \
                                                                                \
         for (size_t i = 0; i < vector_size(collisions); i++)                   \
+        {                                                                      \
             if (movementDelta < 0)                                             \
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis +                          \
@@ -43,6 +44,11 @@ typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis -                          \
                     (character->hitbox).sizeAxis;                              \
+            else                                                               \
+                continue;                                                      \
+                                                                               \
+            (character->velocity).posAxis = 0;                                 \
+        }                                                                      \
                                                                                \
         vector_free(collisions);                                               \
     }
