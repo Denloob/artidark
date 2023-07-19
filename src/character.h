@@ -22,47 +22,6 @@ typedef struct Character
 typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
 
 /**
- * @brief Fixes character clipping through tile on one axis.
- *
- * @param tiles Tiles the character could be possibly clipped through.
- * @param movementDelta Delta of player's movement.
- * @param posAxis `x` or `y`
- * @param sizeAxis `w` or `h`
- */
-#define character_fixTileClip(character, tiles, movementDelta, posAxis,        \
-                              sizeAxis)                                        \
-    {                                                                          \
-        VecTile *collisions = character_findCollisions(character, tiles);      \
-                                                                               \
-        for (size_t i = 0; i < vector_size(collisions); i++)                   \
-        {                                                                      \
-            if (movementDelta < 0)                                             \
-                (character->hitbox).posAxis =                                  \
-                    (collisions[i]->hitbox).posAxis +                          \
-                    (collisions[i]->hitbox).sizeAxis;                          \
-            else if (movementDelta > 0)                                        \
-                (character->hitbox).posAxis =                                  \
-                    (collisions[i]->hitbox).posAxis -                          \
-                    (character->hitbox).sizeAxis;                              \
-            else                                                               \
-                continue;                                                      \
-                                                                               \
-            (character->velocity).posAxis = 0;                                 \
-        }                                                                      \
-                                                                               \
-        vector_free(collisions);                                               \
-    }
-
-/** Clamps the velocity of character on given axis between -max_velocity and
- *      +max_velocity.
- */
-#define character_clampVelocityOnAxis(character, axis, max_velocity)           \
-    {                                                                          \
-        (character->velocity).axis = SDL_clamp((character->velocity).axis,     \
-                                               -max_velocity, max_velocity);   \
-    }
-
-/**
  * @brief Creates a character
  *
  * @param texture The texture of the character.
