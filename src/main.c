@@ -50,9 +50,9 @@ int main(int argc, char *argv[])
     int w, h;
     SDL_QueryTexture(characterTexture, NULL, NULL, &w, &h);
 
-    Character *character =
-        character_create(characterTexture, (SDL_FRect){0, 0, w, h},
-                         CHARACTER_SPEED, SCALING_FACTOR);
+    Character *character = character_create(
+        characterTexture, (SDL_FRect){0, 0, w, h}, CHARACTER_SPEED,
+        CHARACTER_JUMP_STRENGTH, SCALING_FACTOR);
 
     FILE *levelFile = fopen(levelPath, "rb");
     if (!levelFile)

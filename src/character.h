@@ -10,13 +10,22 @@ typedef uint8_t CharacterMovementDirection;
 #define CHARACTER_MOVE_LEFT (CharacterMovementDirection)0x01  // 0b01
 #define CHARACTER_MOVE_RIGHT (CharacterMovementDirection)0x02 // 0b10
 
+typedef uint8_t CharacterCollisionDirection;
+
+#define CHARACTER_COLLISION_TOP (CharacterCollisionDirection)0x01
+#define CHARACTER_COLLISION_BOTTOM (CharacterCollisionDirection)0x02
+#define CHARACTER_COLLISION_LEFT (CharacterCollisionDirection)0x04
+#define CHARACTER_COLLISION_RIGHT (CharacterCollisionDirection)0x08
+
 typedef struct Character
 {
     SDL_FRect hitbox;
     SDL_FPoint velocity;
     SDL_Texture *texture;
     int speed;
+    int jumpStrength;
     CharacterMovementDirection movementDirection;
+    CharacterCollisionDirection collisions;
 } Character;
 
 typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
@@ -32,12 +41,13 @@ typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
  *                  calculations.
  *               When drawing, the texture will be stretched to fit the hitbox.
  * @param speed The speed of the character.
+ * @param jumpStrength The jump strength of the character.
  * @param scalingFactor The scaling factor to apply to the hitbox width and
  *                      height.
  * @return The created character
  */
 Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
-                            int scalingFactor);
+                            int jumpStrength, int scalingFactor);
 
 /**
  * @brief Destroys the character
@@ -95,6 +105,31 @@ void character_setMovement(Character *character,
  */
 void character_unsetMovement(Character *character,
                              CharacterMovementDirection direction);
+
+/**
+ * @brief Sets the character's collisions to the given collision, while keeping
+ *          the previous collision data.
+ *
+ * @param The collision direction to set.
+ * @see CharacterCollisionDirection
+ */
+void character_setCollision(Character *character,
+                            CharacterCollisionDirection direction);
+
+/**
+ * @brief Un-sets the character's collisions to the given direction.
+ *
+ * @param The collision direction to unset.
+ */
+void character_unsetCollision(Character *character,
+                              CharacterCollisionDirection direction);
+
+/**
+ * @brief Checks if the character is currently standing (touching) the ground.
+ *
+ * @return True if yes, false otherwise.
+ */
+bool character_isOnGround(Character *character);
 
 /**
  * @brief Handles keyboard events (KEYDOWN / KEYUP) related to the character.

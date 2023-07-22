@@ -5,36 +5,53 @@
 #include "vec.h"
 #include <stddef.h>
 
+#define CHARACTER_COLLISION_y_NEGATIVE CHARACTER_COLLISION_TOP
+#define CHARACTER_COLLISION_y_POSITIVE CHARACTER_COLLISION_BOTTOM
+#define CHARACTER_COLLISION_x_NEGATIVE CHARACTER_COLLISION_LEFT
+#define CHARACTER_COLLISION_x_POSITIVE CHARACTER_COLLISION_RIGHT
+
 /**
- * @brief Fixes character clipping through tile on one axis.
+ * @brief Applies collision physics to the character.
  *
- * @param tiles Tiles the character could be possibly clipped through.
+ * @param collisions The collisions between the character and tiles they could
+ *                      they could collided with.
  * @param movementDelta Delta of player's movement.
  * @param posAxis `x` or `y`
  * @param sizeAxis `w` or `h`
  */
-#define character_fixTileClip(character, tiles, movementDelta, posAxis,        \
-                              sizeAxis)                                        \
+#define character_applyCollisionsAfterMovement(                                \
+    character, collisions, movementDelta, posAxis, sizeAxis)                   \
     {                                                                          \
-        VecTile *collisions = character_findCollisions(character, tiles);      \
+        if (vector_size(collisions))                                           \
+            (character->velocity).posAxis = 0;                                 \
+        character_unsetCollision(                                              \
+            character, (CHARACTER_COLLISION_##posAxis##_NEGATIVE) |            \
+                           (CHARACTER_COLLISION_##posAxis##_POSITIVE));        \
+        CharacterCollisionDirection collisionDirection = 0;                    \
                                                                                \
         for (size_t i = 0; i < vector_size(collisions); i++)                   \
         {                                                                      \
             if (movementDelta < 0)                                             \
+            {                                                                  \
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis +                          \
                     (collisions[i]->hitbox).sizeAxis;                          \
+                                                                               \
+                collisionDirection |=                                          \
+                    (CHARACTER_COLLISION_##posAxis##_NEGATIVE);                \
+            }                                                                  \
             else if (movementDelta > 0)                                        \
+            {                                                                  \
                 (character->hitbox).posAxis =                                  \
                     (collisions[i]->hitbox).posAxis -                          \
                     (character->hitbox).sizeAxis;                              \
-            else                                                               \
-                continue;                                                      \
                                                                                \
-            (character->velocity).posAxis = 0;                                 \
+                collisionDirection |=                                          \
+                    (CHARACTER_COLLISION_##posAxis##_POSITIVE);                \
+            }                                                                  \
         }                                                                      \
                                                                                \
-        vector_free(collisions);                                               \
+        character_setCollision(character, collisionDirection);                 \
     }
 
 /** Clamps the velocity of character on given axis between -max_velocity and
@@ -46,8 +63,21 @@
                                                -max_velocity, max_velocity);   \
     }
 
+#define character_tickMovementOnAxis(character, tiles, applyMovementFunc,      \
+                                     posAxis, sizeAxis)                        \
+    {                                                                          \
+        float posBeforeMovement = (character)->hitbox.posAxis;                 \
+        applyMovementFunc(character);                                          \
+        float movementDelta = (character)->hitbox.posAxis - posBeforeMovement; \
+                                                                               \
+        VecTile *collisions = character_findCollisions(character, tiles);      \
+        character_applyCollisionsAfterMovement(                                \
+            character, collisions, movementDelta, posAxis, sizeAxis);          \
+        vector_free(collisions);                                               \
+    }
+
 Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
-                            int scalingFactor)
+                            int jumpStrength, int scalingFactor)
 {
     Character *character = xmalloc(sizeof(*character));
 
@@ -71,6 +101,7 @@ Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
     character->velocity = (SDL_FPoint){0, 0};
     character->movementDirection = 0;
     character->speed = speed;
+    character->jumpStrength = jumpStrength;
 
     return character;
 }
@@ -99,24 +130,48 @@ void character_tick(Character *character, const VecTile tiles,
     character_tickMovement(character, tiles);
 }
 
-void character_tickMovement(Character *character, const VecTile tiles)
+/*
+ * @brief Applies the horizontal movement the character, without checking for
+ *          any collisions.
+ * @see character_tickHorizontalMovement
+ */
+void character_applyHorizontalMovement(Character *character)
 {
-    float posBeforeMovement = character->hitbox.x;
     character->hitbox.x += character->velocity.x;
-
     if (character->movementDirection & CHARACTER_MOVE_RIGHT)
         character->hitbox.x += character->speed;
     if (character->movementDirection & CHARACTER_MOVE_LEFT)
         character->hitbox.x -= character->speed;
+}
 
-    float movementDelta = character->hitbox.x - posBeforeMovement;
-    character_fixTileClip(character, tiles, movementDelta, x, w);
+/* @see character_tickMovement */
+void character_tickHorizontalMovement(Character *character, const VecTile tiles)
+{
+    character_tickMovementOnAxis(character, tiles,
+                                 character_applyHorizontalMovement, x, w);
+}
 
-    posBeforeMovement = character->hitbox.y;
+/*
+ * @brief Applies the vertical movement the character, without checking for
+ *          any collisions.
+ * @see character_tickVerticalMovement
+ */
+void character_applyVerticalMovement(Character *character)
+{
     character->hitbox.y += character->velocity.y;
+}
 
-    movementDelta = character->hitbox.y - posBeforeMovement;
-    character_fixTileClip(character, tiles, movementDelta, y, h);
+/* @see character_tickMovement */
+void character_tickVerticalMovement(Character *character, const VecTile tiles)
+{
+    character_tickMovementOnAxis(character, tiles,
+                                 character_applyVerticalMovement, y, h);
+}
+
+void character_tickMovement(Character *character, const VecTile tiles)
+{
+    character_tickVerticalMovement(character, tiles);
+    character_tickHorizontalMovement(character, tiles);
 }
 
 void character_setMovement(Character *character,
@@ -131,6 +186,32 @@ void character_unsetMovement(Character *character,
     character->movementDirection &= ~direction;
 }
 
+void character_setCollision(Character *character,
+                            CharacterCollisionDirection direction)
+{
+    character->collisions |= direction;
+}
+
+void character_unsetCollision(Character *character,
+                              CharacterCollisionDirection direction)
+{
+    character->collisions &= ~direction;
+}
+
+bool character_isOnGround(Character *character)
+{
+    return character->collisions & CHARACTER_COLLISION_BOTTOM;
+}
+
+/**
+ * @brief Makes the character jump if they are on ground.
+ */
+void character_jump(Character *character)
+{
+    if (character_isOnGround(character))
+        character->velocity.y -= character->jumpStrength;
+}
+
 void character_handleKeyboardEvent(Character *character,
                                    SDL_KeyboardEvent *event)
 {
@@ -138,6 +219,9 @@ void character_handleKeyboardEvent(Character *character,
     CharacterMovementDirection movementDirection = 0;
     switch (keycode)
     {
+        case SDLK_SPACE:
+            character_jump(character);
+            return;
         case SDLK_d:
         case SDLK_RIGHT:
             movementDirection = CHARACTER_MOVE_RIGHT;
