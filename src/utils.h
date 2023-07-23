@@ -11,3 +11,11 @@ void die(const char *fmt, ...);
  * @param size The size of the memory to allocate.
  */
 void *xmalloc(size_t size);
+
+/**
+ * @brief Reallocates `ptr` and calls `die` on failure.
+ *
+ * @param ptr The pointer to reallocate.
+ * @param size The size of the memory to reallocate.
+ */
+void *xrealloc(void *ptr, size_t size);
