@@ -56,6 +56,11 @@ bool vector_has_space(vector_data* v_data)
 	return v_data->alloc - v_data->length > 0;
 }
 
+bool vector_has_space_for(vector_data *v_data, size_t amount)
+{
+    return v_data->alloc - v_data->length >= amount;
+}
+
 void* _vector_add(vector* vec_addr, vec_type_t type_size)
 {
 	vector_data* v_data = vector_get_data(*vec_addr);
@@ -68,6 +73,21 @@ void* _vector_add(vector* vec_addr, vec_type_t type_size)
 
 	return (void*)&v_data->buff[type_size * v_data->length++];
 }
+
+void _vector_concat(vector *dest_vec_addr, vector source, vec_type_t type_size)
+{
+    vector_data* v_data = vector_get_data(*dest_vec_addr);
+    vector_data* s_data = vector_get_data(source);
+
+    while (!vector_has_space_for(v_data, s_data->length))
+    {
+        v_data = vector_realloc(v_data, type_size);
+        *dest_vec_addr = v_data->buff;
+    }
+
+    memmove(&v_data->buff[type_size * v_data->length], s_data->buff, s_data->length * type_size);
+    v_data->length += s_data->length;
+ }
 
 void* _vector_insert(vector* vec_addr, vec_type_t type_size, vec_size_t pos)
 {

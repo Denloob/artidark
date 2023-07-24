@@ -34,7 +34,27 @@ typedef char* vec_char;
 #define vector_insert(vec_addr, pos, value)                                    \
 	(*vector_insert_asg(vec_addr, pos) = value)
 
+#define IS_SAME_TYPE(a, b)                                                     \
+    _Generic((a), typeof(b): true, default: false)
+
+#define STRINGIFY(x) #x
+
+// vec_addr is a vector* (aka type**)
+// source is a vector (aka type*)
+#define vector_concat(vec_addr, source)                                        \
+    do                                                                         \
+    {                                                                          \
+        _Static_assert(IS_SAME_TYPE(*vec_addr, source),                        \
+                "typeof(*" STRINGIFY(vec_addr) ") "                            \
+                "!= typeof(" STRINGIFY(source) ")");                           \
+        _vector_concat((vector *)vec_addr, (vector)source,                     \
+                       sizeof(**vec_addr));                                    \
+    } while (0)
+
 #else
+
+#define vector_concat(vec_addr, source)                                        \
+    _vector_concat((vector *)vec_addr, (vector)source, sizeof(**vec_addr))
 
 #define vector_add_asg(vec_addr, type)                                         \
 	((type*)_vector_add((vector*)vec_addr, sizeof(type)))
@@ -63,6 +83,8 @@ void vector_free(vector vec);
 vector _vector_add(vector* vec_addr, vec_type_t type_size);
 
 vector _vector_insert(vector* vec_addr, vec_type_t type_size, vec_size_t pos);
+
+void _vector_concat(vector *dest_vec_addr, vector source, vec_type_t type_size);
 
 void _vector_erase(vector* vec_addr, vec_type_t type_size, vec_size_t pos,
 		   vec_size_t len);
