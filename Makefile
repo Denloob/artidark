@@ -8,7 +8,7 @@ LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image csv) -lm
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
 
 TARGET = game
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/*/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
 DEPS = $(patsubst $(SRC_DIR)/%.c, $(DEP_DIR)/%.d, $(SRCS))
 
@@ -20,7 +20,7 @@ $(BIN_DIR)/$(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BIN_DIR) $(DEP_DIR)
+	@mkdir -p $(dir $(OBJS)) $(dir $(DEPS))
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 -include $(DEPS)
@@ -28,7 +28,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	rm -rf $(BIN_DIR) $(DEP_DIR)
 
-CLANG_FLAGS = -Wno-language-extension-token
+CLANG_FLAGS = -Wno-zero-length-array -Wno-gnu-statement-expression-from-macro-expansion -Wno-language-extension-token
 
 clang: CFLAGS += $(CLANG_FLAGS)
 clang: all

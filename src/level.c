@@ -9,11 +9,12 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-Level *level_create(void)
+Level *level_create(char *name)
 {
     Level *level = xmalloc(sizeof(*level));
 
     level->layers = vector_create();
+    level->name = name;
 
     return level;
 }
@@ -25,6 +26,7 @@ void level_destroy(Level *level)
         level_layer_destroy(level->layers[i]);
     }
     vector_free(level->layers);
+    free(level->name);
     free(level);
 }
 
@@ -122,7 +124,9 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
         return NULL;
     }
 
-    Level *level = level_create();
+    char *levelName = readline(stream, '\n', 0, 0);
+    Level *level = level_create(levelName);
+
     struct LayerLoadingData layerLoadingData = {.tileWidth = tileWidth,
                                                 .tileHeight = tileHeight,
                                                 .tileset = tileset,
