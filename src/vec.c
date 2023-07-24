@@ -46,7 +46,7 @@ vector_data* vector_realloc(vector_data* v_data, vec_type_t type_size)
 {
 	vec_size_t new_alloc = (v_data->alloc == 0) ? 1 : v_data->alloc * 2;
 	vector_data* new_v_data = (vector_data*)
-	    realloc(v_data, sizeof(vector_data) + new_alloc * type_size);
+	    xrealloc(v_data, sizeof(vector_data) + new_alloc * type_size);
 	new_v_data->alloc = new_alloc;
 	return new_v_data;
 }
