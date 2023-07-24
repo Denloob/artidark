@@ -139,38 +139,43 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
     size_t bytesRead = 0;
     while ((bytesRead = fread(buf, 1, sizeof(buf), stream)) > 0)
     {
-        size_t bytesToParse = indexOf(buf, bytesRead, LEVEL_LAYER_SEPARATOR);
-        if (csv_parse(&parser, buf, bytesToParse, level_fieldParserCallback,
-                      level_rowParserCallback,
-                      &layerLoadingData) != bytesToParse)
-        {
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                     "Error during level parsing",
-                                     csv_strerror(csv_error(&parser)), 0);
-        }
-
-        /* If there was a separator in the bytes we read, we need to add the
-         * next layer.
+        char *layerBuf = buf;
+        size_t layerSize = 0;
+        /*
+         * Note about the following algorithm: We do not care if layer separator
+         * comes with a new line, as csv_parse ignores empty lines by default.
+         *
+         * The algo works by just reading until the sep, and moving the layer
+         * buffer to start right after the sep. And we read like this until we
+         * have read the whole buf.
          */
-        if (bytesToParse != bytesRead)
+        do
         {
-            level_addLayer(level, layerLoadingData.currentLayer);
+            size_t prevLayerSize = layerSize;
 
-            char *nextLayerBuf =
-                buf + bytesToParse + 1; // 1 for LEVEL_LAYER_SEPARATOR
-            size_t nextLayerBytesToParse = bytesRead - bytesToParse - 1; // Same
+            layerBuf += prevLayerSize;
+            layerSize = indexOf(layerBuf, bytesRead - prevLayerSize,
+                                LEVEL_LAYER_SEPARATOR);
 
-            layerLoadingData.currentLayer = level_layer_create();
-            layerLoadingData.currentPos = (SDL_Point){0};
-            if (csv_parse(&parser, nextLayerBuf, nextLayerBytesToParse,
+            if (csv_parse(&parser, layerBuf, layerSize,
                           level_fieldParserCallback, level_rowParserCallback,
-                          &layerLoadingData) != bytesRead - bytesToParse)
+                          &layerLoadingData) != layerSize)
             {
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                          "Error during level parsing",
                                          csv_strerror(csv_error(&parser)), 0);
             }
-        }
+
+            bool thereWillBeANewLayer = layerSize != bytesRead - prevLayerSize;
+            if (thereWillBeANewLayer)
+            {
+                level_addLayer(level, layerLoadingData.currentLayer);
+                layerLoadingData.currentLayer = level_layer_create();
+                layerLoadingData.currentPos = (SDL_Point){0};
+                layerSize += 1; // Skip the separator.
+            }
+
+        } while (layerBuf + layerSize != buf + bytesRead);
     }
 
     csv_fini(&parser, level_fieldParserCallback, level_rowParserCallback,
