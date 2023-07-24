@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     if (!tilesetFile)
         die("Opening file %s failed", tilesetPath);
 
-    // tileset_load also could fail, so by this we check both
     Tileset *tileset =
         tileset_load(tilesetFile, strdup(texturesDirPath), renderer);
 
