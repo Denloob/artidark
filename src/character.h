@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL.h"
+#include "level_layer.h"
 #include "tile.h"
 #include "vec.h"
 #include <stdint.h>
@@ -74,19 +75,21 @@ void character_draw(const Character *character, SDL_Renderer *renderer);
 /**
  * @brief Updates character's fields and ensures they all are valid.
  *
- * @param tiles The tiles surrounding the character.
+ * @param layers Layers vector which contain tiles with which the player could
+ *                  have collided.
  * @param max_acceleration The maximum acceleration the character can have.
  */
-void character_tick(Character *character, const VecTile tiles,
+void character_tick(Character *character, const VecLevelLayer layers,
                     float max_acceleration);
 
 /**
  * @brief Moves the character as needed and checks that the character doesn't
  *          clip through tiles.
  *
- * @param tiles The tiles surrounding the character.
+ * @param layers Layers vector which contain tiles with which the player could
+ *                  have collided.
  */
-void character_tickMovement(Character *character, const VecTile tiles);
+void character_tickMovement(Character *character, const VecLevelLayer layers);
 
 /**
  * @brief Sets character's movement to the given direction, while keeping the
@@ -154,3 +157,13 @@ void character_applyGravity(Character *character, float gravity);
  */
 VecTile *character_findCollisions(const Character *character,
                                   const VecTile tiles);
+
+/**
+ * @brief Finds the collisions between the character and the tiles in layers.
+ *
+ * @param layers Layers vector which contain tiles to find collision with.
+ * @return Vector of pointers to all the tiles player collides with.
+ * @see character_findCollisions
+ */
+VecTile *character_findCollisionsWithLayerTiles(const Character *character,
+                                                const VecLevelLayer layers);

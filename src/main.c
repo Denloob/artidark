@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         }
 
         character_applyGravity(character, GRAVITY);
-        character_tick(character, currentLevel->layers[0]->tiles,
+        character_tick(character, currentLevel->layers,
                        MAX_ACCELERATION);
 
         level_draw(currentLevel, renderer);

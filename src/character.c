@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "character.h"
+#include "level_layer.h"
 #include "tile.h"
 #include "utils.h"
 #include "vec.h"
@@ -63,14 +64,15 @@
                                                -max_velocity, max_velocity);   \
     }
 
-#define character_tickMovementOnAxis(character, tiles, applyMovementFunc,      \
+#define character_tickMovementOnAxis(character, layers, applyMovementFunc,     \
                                      posAxis, sizeAxis)                        \
     {                                                                          \
         float posBeforeMovement = (character)->hitbox.posAxis;                 \
         applyMovementFunc(character);                                          \
         float movementDelta = (character)->hitbox.posAxis - posBeforeMovement; \
                                                                                \
-        VecTile *collisions = character_findCollisions(character, tiles);      \
+        VecTile *collisions =                                                  \
+            character_findCollisionsWithLayerTiles(character, layers);         \
         character_applyCollisionsAfterMovement(                                \
             character, collisions, movementDelta, posAxis, sizeAxis);          \
         vector_free(collisions);                                               \
@@ -122,12 +124,12 @@ void character_draw(const Character *character, SDL_Renderer *renderer)
     SDL_RenderCopyF(renderer, character->texture, NULL, &character->hitbox);
 }
 
-void character_tick(Character *character, const VecTile tiles,
+void character_tick(Character *character, const VecLevelLayer layers,
                     float max_acceleration)
 {
     character_clamp_velocity(character, max_acceleration);
 
-    character_tickMovement(character, tiles);
+    character_tickMovement(character, layers);
 }
 
 /*
@@ -145,9 +147,10 @@ void character_applyHorizontalMovement(Character *character)
 }
 
 /* @see character_tickMovement */
-void character_tickHorizontalMovement(Character *character, const VecTile tiles)
+void character_tickHorizontalMovement(Character *character,
+                                      const VecLevelLayer layers)
 {
-    character_tickMovementOnAxis(character, tiles,
+    character_tickMovementOnAxis(character, layers,
                                  character_applyHorizontalMovement, x, w);
 }
 
@@ -162,16 +165,17 @@ void character_applyVerticalMovement(Character *character)
 }
 
 /* @see character_tickMovement */
-void character_tickVerticalMovement(Character *character, const VecTile tiles)
+void character_tickVerticalMovement(Character *character,
+                                    const VecLevelLayer layers)
 {
-    character_tickMovementOnAxis(character, tiles,
+    character_tickMovementOnAxis(character, layers,
                                  character_applyVerticalMovement, y, h);
 }
 
-void character_tickMovement(Character *character, const VecTile tiles)
+void character_tickMovement(Character *character, const VecLevelLayer layers)
 {
-    character_tickVerticalMovement(character, tiles);
-    character_tickHorizontalMovement(character, tiles);
+    character_tickVerticalMovement(character, layers);
+    character_tickHorizontalMovement(character, layers);
 }
 
 void character_setMovement(Character *character,
@@ -263,6 +267,22 @@ VecTile *character_findCollisions(const Character *character,
             // NOLINTNEXTLINE(bugprone-sizeof-expression)
             vector_add(&collisions, &tiles[i]);
         }
+    }
+
+    return collisions;
+}
+
+VecTile *character_findCollisionsWithLayerTiles(const Character *character,
+                                                const VecLevelLayer layers)
+{
+    VecTile *collisions = vector_create();
+    for (size_t i = 0; i < vector_size(layers); i++)
+    {
+        VecTile *collisionsWithCurrentLayer =
+            character_findCollisions(character, layers[i]->tiles);
+
+        // NOLINTNEXTLINE(bugprone-sizeof-expression)
+        vector_concat(&collisions, collisionsWithCurrentLayer);
     }
 
     return collisions;
