@@ -291,6 +291,8 @@ VecTile *character_findCollisionsWithLayerTiles(const Character *character,
 
         // NOLINTNEXTLINE(bugprone-sizeof-expression)
         vector_concat(&collisions, collisionsWithCurrentLayer);
+
+        vector_free(collisionsWithCurrentLayer);
     }
 
     return collisions;
