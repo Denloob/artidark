@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
     if (!currentLevel)
         die("Level %s not found", levelName);
 
+    SDL_FPoint renderingOffset = {0};
+
     bool done = false;
     while (!done)
     {
@@ -84,12 +86,13 @@ int main(int argc, char *argv[])
         }
 
         character_applyGravity(character, GRAVITY);
-        character_tick(character, currentLevel->layers,
-                       MAX_ACCELERATION);
+        character_tick(character, currentLevel->layers, MAX_ACCELERATION);
 
-        level_draw(currentLevel, renderer);
+        calculateRenderingOffset(character, renderingOffset, &renderingOffset);
 
-        character_draw(character, renderer);
+        level_draw(currentLevel, renderer, &renderingOffset);
+
+        character_draw(character, renderer, &renderingOffset);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(FRAME_DURATION);
@@ -104,6 +107,28 @@ int main(int argc, char *argv[])
     SDL_Quit();
 
     return EXIT_SUCCESS;
+}
+
+void calculateRenderingOffset(const Character *character,
+                              const SDL_FPoint previousOffset,
+                              SDL_FPoint *newOffset)
+{
+    const SDL_FPoint characterPos = character_getPosition(character);
+
+    const SDL_FPoint onScreenPos = {characterPos.x + previousOffset.x,
+                                    characterPos.y + previousOffset.y};
+
+    float leftBoundary = CHARACTER_SCROLL_BORDER_HORIZONTAL;
+    float rightBoundary = WINDOW_WIDTH - CHARACTER_SCROLL_BORDER_HORIZONTAL;
+
+    newOffset->x = -(characterPos.x -
+                     SDL_clamp(onScreenPos.x, leftBoundary, rightBoundary));
+
+    leftBoundary = CHARACTER_SCROLL_BORDER_VERTICAL;
+    rightBoundary = WINDOW_HEIGHT - CHARACTER_SCROLL_BORDER_VERTICAL;
+
+    newOffset->y = -(characterPos.y -
+                     SDL_clamp(onScreenPos.y, leftBoundary, rightBoundary));
 }
 
 LevelHashmap *loadLevels(const char **levelPaths, size_t size, Tileset *tileset)

@@ -69,8 +69,12 @@ void character_clamp_velocity(Character *character, float max_velocity);
  * @brief Draws the character.
  *
  * @param renderer The renderer to draw onto.
+ * @param offset By how much to offset character's position on the screen.
+ *
+ * @see renderer_renderCopyWithOffsetF
  */
-void character_draw(const Character *character, SDL_Renderer *renderer);
+void character_draw(const Character *character, SDL_Renderer *renderer,
+                    SDL_FPoint *offset);
 
 /**
  * @brief Updates character's fields and ensures they all are valid.
@@ -167,3 +171,10 @@ VecTile *character_findCollisions(const Character *character,
  */
 VecTile *character_findCollisionsWithLayerTiles(const Character *character,
                                                 const VecLevelLayer layers);
+
+/**
+ * @brief Gets the character position as an SDL_FPoint.
+ *
+ * @return SDL_FPoint representing character's position.
+ */
+SDL_FPoint character_getPosition(const Character *character);

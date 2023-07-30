@@ -34,5 +34,8 @@ void level_layer_add_tile(LevelLayer *layer, Tile tile);
  * @brief Draws the level layer.
  *
  * @param renderer The renderer to draw onto.
+ * @param offset The offset to apply to each of the tiles.
+ *
+ * @see tile_draw
  */
-void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer);
+void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer, SDL_FPoint *offset);

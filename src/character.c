@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "character.h"
 #include "level_layer.h"
+#include "renderer.h"
 #include "tile.h"
 #include "utils.h"
 #include "vec.h"
@@ -119,9 +120,16 @@ void character_clamp_velocity(Character *character, float max_velocity)
     character_clampVelocityOnAxis(character, y, max_velocity);
 }
 
-void character_draw(const Character *character, SDL_Renderer *renderer)
+void character_draw(const Character *character, SDL_Renderer *renderer,
+                    SDL_FPoint *offset)
 {
-    SDL_RenderCopyF(renderer, character->texture, NULL, &character->hitbox);
+    renderer_renderCopyWithOffsetF(renderer, character->texture, NULL,
+                                   &character->hitbox, offset);
+}
+
+SDL_FPoint character_getPosition(const Character *character)
+{
+    return (SDL_FPoint){character->hitbox.x, character->hitbox.y};
 }
 
 void character_tick(Character *character, const VecLevelLayer layers,

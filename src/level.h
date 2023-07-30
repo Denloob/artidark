@@ -39,8 +39,11 @@ void level_addLayer(Level *level, LevelLayer *layer);
  * @brief Draws the level.
  *
  * @param renderer The renderer to draw onto.
+ * @param offset The offset to apply to each of the layers.
+ *
+ * @see level_layer_draw
  */
-void level_draw(const Level *level, SDL_Renderer *renderer);
+void level_draw(const Level *level, SDL_Renderer *renderer, SDL_FPoint *offset);
 
 /**
  * @brief Loads a level from a file.

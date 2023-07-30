@@ -37,3 +37,19 @@ int initRenderer(SDL_Renderer **renderer, SDL_Window **window)
 
     return *renderer ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+int renderer_renderCopyWithOffsetF(SDL_Renderer *renderer, SDL_Texture *texture,
+                                   const SDL_Rect *srcrect,
+                                   const SDL_FRect *dstrect, SDL_FPoint *offset)
+{
+    const float xOffset = offset ? offset->x : 0;
+    const float yOffset = offset ? offset->y : 0;
+    const SDL_FRect dstrectWithOffset = {
+        .x = dstrect->x + xOffset,
+        .y = dstrect->y + yOffset,
+        .w = dstrect->w,
+        .h = dstrect->h,
+    };
+
+    return SDL_RenderCopyF(renderer, texture, srcrect, &dstrectWithOffset);
+}

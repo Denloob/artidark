@@ -1,10 +1,12 @@
 #include "SDL.h"
+#include "renderer.h"
 #include "tile.h"
 #include <stdlib.h>
 
-void tile_draw(const Tile *tile, SDL_Renderer *renderer)
+void tile_draw(const Tile *tile, SDL_Renderer *renderer, SDL_FPoint *offset)
 {
-    SDL_RenderCopyF(renderer, tile->texture, NULL, &tile->hitbox);
+    renderer_renderCopyWithOffsetF(renderer, tile->texture, NULL, &tile->hitbox,
+                                   offset);
 }
 
 void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture, bool solid)

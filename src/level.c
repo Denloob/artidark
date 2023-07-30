@@ -30,11 +30,11 @@ void level_destroy(Level *level)
     free(level);
 }
 
-void level_draw(const Level *level, SDL_Renderer *renderer)
+void level_draw(const Level *level, SDL_Renderer *renderer, SDL_FPoint *offset)
 {
     for (size_t i = 0; i < vector_size(level->layers); i++)
     {
-        level_layer_draw(level->layers[i], renderer);
+        level_layer_draw(level->layers[i], renderer, offset);
     }
 }
 

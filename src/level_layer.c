@@ -23,10 +23,10 @@ void level_layer_add_tile(LevelLayer *layer, Tile tile)
     vector_add(&layer->tiles, tile);
 }
 
-void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer)
+void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer, SDL_FPoint *offset)
 {
     for (size_t i = 0; i < vector_size(layer->tiles); i++)
     {
-        tile_draw(&layer->tiles[i], renderer);
+        tile_draw(&layer->tiles[i], renderer, offset);
     }
 }

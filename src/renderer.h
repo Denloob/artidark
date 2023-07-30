@@ -31,3 +31,15 @@ int initWindow(SDL_Window **window, const char *windowName, int width,
  * @return EXIT_SUCCESS on success or EXIT_FAILURE on fail
  */
 int initRenderer(SDL_Renderer **renderer, SDL_Window **window);
+
+/** Wrapper for the SDL_RenderCopyF function, offsets the dstrect position.
+ *
+ * @param offset The offset to apply to the dstrect x and y.
+ *                  When NULL, no offset is applied.
+ *
+ * @see SDL_RenderCopyF
+ */
+int renderer_renderCopyWithOffsetF(SDL_Renderer *renderer, SDL_Texture *texture,
+                                   const SDL_Rect *srcrect,
+                                   const SDL_FRect *dstrect,
+                                   SDL_FPoint *offset);
