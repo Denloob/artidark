@@ -13,7 +13,7 @@
 
 #define WINDOW_NAME "Game"
 
-#define BACKGROUND_COLOR 0xFF, 0xFF, 0xFF, 0xFF
+#define BACKGROUND_COLOR 0x00, 0x00, 0x00, 0xFF
 
 #define FPS 60
 
