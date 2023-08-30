@@ -7,7 +7,14 @@
 typedef enum TileCallbackType
 {
     TILE_CALLBACK_NONE,
+    TILE_CALLBACK_DOOR
 } TileCallbackType;
+
+struct TileCallbackDoorArgument
+{
+    TileCallbackType type;  // TILE_CALLBACK_DOOR
+    char *destinationLevel; // The name of the level where this door leads too.
+};
 
 typedef union TileArguments
 {
@@ -66,11 +73,26 @@ void tile_callback_args_cleanup(TileArguments *args);
  */
 const TileCallbackInfo *tile_callback_get(const char *name);
 
+/**
+ * @brief Called when a door event is triggered
+ *
+ * @param args Union with struct DoorArgument set.
+ *
+ * @see tile_callback_get
+ */
+void tile_callback_door(TileArguments *args);
 
 /**
  * @brief Does nothing
  */
 void tile_callback_none(TileArguments *);
+
+/**
+ * @brief Cleans up memory used by the door callback arguments.
+ *
+ * @param args The callback arguments to clean up.
+ */
+void tile_callback_door_cleanup(struct TileCallbackDoorArgument *args);
 
 /**
  * @brief Initializes a tile

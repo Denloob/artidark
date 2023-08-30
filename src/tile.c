@@ -40,6 +40,7 @@ void tile_callback_init()
     hashmap_init(&tileCallbacks, hashmap_hash_string, strcmp);
 
     tile_callback_add("", TILE_CALLBACK_NONE, tile_callback_none);
+    tile_callback_add("door", TILE_CALLBACK_DOOR, tile_callback_door);
 }
 
 void tile_callback_cleanup()
@@ -63,9 +64,19 @@ const TileCallbackInfo *tile_callback_get(const char *name)
     return hashmap_get(&tileCallbacks, name);
 }
 
+void tile_callback_door(TileArguments *args)
+{
+    // TODO: not implemented
+}
+
 void tile_callback_none(TileArguments *)
 {
     /* Does nothing. */
+}
+
+void tile_callback_door_cleanup(struct TileCallbackDoorArgument *args)
+{
+    free(args->destinationLevel);
 }
 
 void tile_callback_args_cleanup(TileArguments *args)
@@ -74,6 +85,8 @@ void tile_callback_args_cleanup(TileArguments *args)
     {
         case TILE_CALLBACK_NONE:
             break;
+        case TILE_CALLBACK_DOOR:
+            tile_callback_door_cleanup(&args->door);
     }
 }
 

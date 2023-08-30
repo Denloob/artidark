@@ -167,6 +167,11 @@ void tileset_fieldParserCallback(void *fieldBytes,
 
                 switch (callbackInfo->type)
                 {
+                    case TILE_CALLBACK_DOOR:
+                        SDL_assert(commandArgsTokensSize == 1);
+                        callbackArgs.door = (struct TileCallbackDoorArgument){
+                            .destinationLevel = strdup(commandArgsTokens[0])};
+                        break;
                     case TILE_CALLBACK_NONE:
                         /* TODO: we probably want to raise a warning or something,
                          * because it shouldn't have any arguments... */
