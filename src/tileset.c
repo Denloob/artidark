@@ -1,5 +1,6 @@
 #include "SDL_image.h"
 #include "csv.h"
+#include "tile.h"
 #include "tileset.h"
 #include "utils.h"
 #include "vec.h"
@@ -68,6 +69,7 @@ enum FieldType
     FIELD_ID,
     FIELD_PATH,
     FIELD_SOLID,
+    FIELD_CALLBACK,
 };
 
 struct TilesetLoadingData
@@ -77,10 +79,45 @@ struct TilesetLoadingData
     Tileset *tileset;
 };
 
+typedef vec_char *vec_str;
+
+/**
+ * @brief Splits the given string on the given chars and returns
+ *          a vector of tokens after split.
+ *        The out vector is managed by the caller, both the vec and the
+ *          vector and then strings (char vectors) inside.
+ *
+ * @param str The string to split.
+ * @param ch The chars to split at.
+ * @return Vector of strings (char vectors).
+ *      All managed by the caller.
+ */
+vec_str strSplit(const char *str, char ch)
+{
+    vec_str tokens = vector_create();
+
+    vec_char currString = vector_create();
+
+    do
+    {
+        if (*str == ch || *str == '\0')
+        {
+            vector_add(&currString, '\0');
+            vector_add(&tokens, currString);
+            currString = vector_create();
+            continue;
+        }
+
+        vector_add(&currString, *str);
+    } while (*str++);
+
+    vector_free(currString);
+    return tokens;
+}
+
 void tileset_fieldParserCallback(void *fieldBytes,
                                  size_t _ __attribute__((unused)), void *data)
 {
-
     struct TilesetLoadingData *tilesetLoadingData = data;
     Tileset *tileset = tilesetLoadingData->tileset;
     TilesetEntry *lastEntry =
@@ -108,6 +145,46 @@ void tileset_fieldParserCallback(void *fieldBytes,
         case FIELD_SOLID:
             lastEntry->solid = atoi(fieldStr) != 0;
             break;
+        case FIELD_CALLBACK:
+        {
+            vec_str callback_tokens = strSplit(fieldStr, ' ');
+
+            vec_char commandName = callback_tokens[0];
+            const TileCallbackInfo *callbackInfo =
+                tile_callback_get(commandName);
+
+            TileCallback callback = callbackInfo->callback;
+            SDL_assert(callback != NULL);
+
+            TileArguments callbackArgs;
+            if (vector_size(callback_tokens) > 1)
+            {
+                /* It's not a vec_str anymore, but a (vec_char *).
+                 * Because we added +1, all the `vector_` functions will produce
+                 * undefined behavior. */
+                vec_char *commandArgsTokens = callback_tokens + 1;
+                size_t commandArgsTokensSize = vector_size(callback_tokens) - 1;
+
+                switch (callbackInfo->type)
+                {
+                    case TILE_CALLBACK_NONE:
+                        /* TODO: we probably want to raise a warning or something,
+                         * because it shouldn't have any arguments... */
+                        break;
+                }
+            }
+            callbackArgs.type = callbackInfo->type;
+
+            for (size_t i = 0; i < vector_size(callback_tokens); i++)
+            {
+                vector_free(callback_tokens[i]);
+            }
+            vector_free(callback_tokens);
+
+            lastEntry->callback = callback;
+            lastEntry->args = callbackArgs;
+            break;
+        }
     }
 
     // Change type to the next field type, as the enum is in order.
@@ -132,6 +209,8 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
                                  csv_strerror(csv_error(&parser)), 0);
         return NULL;
     }
+
+    tile_callback_init();
 
     /* It will work like this:
      * For each row, we append new entry to the vector.
@@ -163,6 +242,7 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
     csv_fini(&parser, tileset_fieldParserCallback, tileset_rowParserCallback,
              &tilesetLoadingData);
     csv_free(&parser);
+    tile_callback_cleanup();
 
     // Pop the empty entry added by the loading algorithm
     // NOLINTNEXTLINE(bugprone-sizeof-expression)
@@ -173,7 +253,8 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
 }
 
 int tileset_QueryTextureByID(const Tileset *tileset, int id,
-                             SDL_Texture **texture, bool *solid)
+                             SDL_Texture **texture, bool *solid,
+                             TileCallback *callback, TileArguments **args)
 {
     for (size_t i = 0; i < vector_size(tileset->entries); i++)
     {
@@ -183,6 +264,10 @@ int tileset_QueryTextureByID(const Tileset *tileset, int id,
                 *texture = tileset->entries[i].texture;
             if (solid)
                 *solid = tileset->entries[i].solid;
+            if (callback)
+                *callback = tileset->entries[i].callback;
+            if (args)
+                *args = &tileset->entries[i].args;
 
             return EXIT_SUCCESS;
         }

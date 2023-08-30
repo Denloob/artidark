@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL.h"
+#include "tile.h"
 
 #define DIR_SEPARATOR '/'
 
@@ -9,6 +10,8 @@ typedef struct TilesetEntry
     bool solid;
     int id;
     SDL_Texture *texture;
+    TileCallback callback;
+    TileArguments args;
 } TilesetEntry;
 
 typedef TilesetEntry *VecTilesetEntry;
@@ -58,13 +61,19 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
  * @see Tileset
  * @return The created tileset.
  *
+ * @warning This function relies on tile_callback_get, this means that the tile
+ *              callback must be initialized before this function is called.
+ * @see tile_callback_get
+ * @see tile_callback_init
+ *
  * @see tileset_destroy
  */
 Tileset *tileset_create(char *textureDirPath);
 
 /**
  * @brief Destroys a tileset.
- * @warning Destroys the textures and frees the textureDirPath
+ * @warning Destroys the textures, frees the textureDirPath and the
+ *           TileArguments.
  */
 void tileset_destroy(Tileset *tileset);
 
@@ -75,7 +84,10 @@ void tileset_destroy(Tileset *tileset);
  * @param id The id of the tile to find.
  * @param[out] texture The texture of the tile.
  * @param[out] solid Whether the tile is solid or not.
+ * @param[out] callback The callback function for the tile.
+ * @param[out] args The callback arguments for the tile.
  * @return EXIT_SUCCESS if id exists, EXIT_FAILURE otherwise.
  */
 int tileset_QueryTextureByID(const Tileset *tileset, int id,
-                             SDL_Texture **texture, bool *solid);
+                             SDL_Texture **texture, bool *solid,
+                             TileCallback *callback, TileArguments **args);
