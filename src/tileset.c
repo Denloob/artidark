@@ -1,6 +1,7 @@
 #include "SDL_image.h"
 #include "csv.h"
 #include "tile.h"
+#include "tile_callback.h"
 #include "tileset.h"
 #include "utils.h"
 #include "vec.h"

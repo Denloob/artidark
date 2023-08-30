@@ -2,6 +2,7 @@
 
 #include "SDL.h"
 #include "tile.h"
+#include "tile_callback.h"
 
 #define DIR_SEPARATOR '/'
 
