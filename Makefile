@@ -3,7 +3,7 @@ BIN_DIR = bin
 DEP_DIR = .deps
 
 CC = gcc
-CFLAGS = -g -Wall -Wextra -pedantic -std=gnu2x $(shell pkg-config --cflags sdl2 SDL2_image csv) -I$(SRC_DIR)
+CFLAGS = -g -Wall -Wextra -std=gnu2x $(shell pkg-config --cflags sdl2 SDL2_image csv) -I$(SRC_DIR)
 LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_image csv) -lm
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
 
@@ -28,7 +28,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	rm -rf $(BIN_DIR) $(DEP_DIR)
 
-CLANG_FLAGS = -Wno-zero-length-array -Wno-gnu-statement-expression-from-macro-expansion -Wno-language-extension-token
+CLANG_FLAGS = -Wno-missing-field-initializers
 
 clang: CFLAGS += $(CLANG_FLAGS)
 clang: all
