@@ -261,18 +261,21 @@ int tileset_QueryTextureByID(const Tileset *tileset, int id,
                              SDL_Texture **texture, bool *solid,
                              TileCallback *callback, TileArguments **args)
 {
-    for (size_t i = 0; i < vector_size(tileset->entries); i++)
+    TilesetEntry *entries_end =
+        tileset->entries + vector_size(tileset->entries);
+
+    for (TilesetEntry *entry = tileset->entries; entry < entries_end; entry++)
     {
-        if (tileset->entries[i].id == id)
+        if (entry->id == id)
         {
             if (texture)
-                *texture = tileset->entries[i].texture;
+                *texture = entry->texture;
             if (solid)
-                *solid = tileset->entries[i].solid;
+                *solid = entry->solid;
             if (callback)
-                *callback = tileset->entries[i].callback;
+                *callback = entry->callback;
             if (args)
-                *args = &tileset->entries[i].args;
+                *args = &entry->args;
 
             return EXIT_SUCCESS;
         }
