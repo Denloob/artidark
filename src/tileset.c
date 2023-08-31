@@ -17,6 +17,7 @@ void tileset_entry_init(TilesetEntry *entry, int id, SDL_Texture *texture)
 void tileset_entry_cleanup(TilesetEntry *entry)
 {
     SDL_DestroyTexture(entry->texture);
+    tile_callback_args_cleanup(&entry->args);
 }
 
 Tileset *tileset_create(char *textureDirPath)
