@@ -84,9 +84,8 @@ void level_fieldParserCallback(void *fieldBytes,
     SDL_Texture *tileTexture = NULL;
     bool solid = 0;
     TileCallback callback;
-    TileArguments *args;
     if (tileset_QueryTextureByID(layerLoadingData->tileset, id, &tileTexture,
-                                 &solid, &callback, &args))
+                                 &solid, &callback))
     {
         die("Error while loading level:\nNo texture with ID %d", id);
     }
@@ -99,7 +98,7 @@ void level_fieldParserCallback(void *fieldBytes,
                               layerLoadingData->currentPos.y,
                               w * layerLoadingData->scalingFactor,
                               h * layerLoadingData->scalingFactor},
-                  tileTexture, solid, callback, args);
+                  tileTexture, solid, callback);
         level_layer_add_tile(layerLoadingData->currentLayer, tile);
     }
 

@@ -154,7 +154,7 @@ void tileset_fieldParserCallback(void *fieldBytes,
             const TileCallbackInfo *callbackInfo =
                 tile_callback_get(commandName);
 
-            TileCallback callback = callbackInfo->callback;
+            TileCallbackFunction callback = callbackInfo->callback;
             SDL_assert(callback != NULL);
 
             TileArguments callbackArgs;
@@ -260,7 +260,7 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
 
 int tileset_QueryTextureByID(const Tileset *tileset, int id,
                              SDL_Texture **texture, bool *solid,
-                             TileCallback *callback, TileArguments **args)
+                             TileCallback *callback)
 {
     TilesetEntry *entries_end =
         tileset->entries + vector_size(tileset->entries);
@@ -274,9 +274,7 @@ int tileset_QueryTextureByID(const Tileset *tileset, int id,
             if (solid)
                 *solid = entry->solid;
             if (callback)
-                *callback = entry->callback;
-            if (args)
-                *args = &entry->args;
+                *callback = (TileCallback){entry->callback, &entry->args};
 
             return EXIT_SUCCESS;
         }

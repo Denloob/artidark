@@ -10,7 +10,7 @@ static TileCallbackHashmap tileCallbacks;
 
 TileCallbackInfo *tile_callback_info_create(const char *name,
                                             TileCallbackType type,
-                                            TileCallback callback)
+                                            TileCallbackFunction callback)
 {
     TileCallbackInfo *info = xmalloc(sizeof(TileCallbackInfo));
     info->name = strdup(name);
@@ -27,7 +27,7 @@ void tile_callback_info_destroy(TileCallbackInfo *info)
 }
 
 void tile_callback_add(const char *name, TileCallbackType type,
-                       TileCallback callback)
+                       TileCallbackFunction callback)
 {
     TileCallbackInfo *info = tile_callback_info_create(name, type, callback);
 

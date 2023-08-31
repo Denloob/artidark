@@ -18,14 +18,20 @@ typedef union TileArguments
     struct TileCallbackDoorArgument door;
 } TileArguments;
 
-typedef void (*TileCallback)(TileArguments *args);
+typedef void (*TileCallbackFunction)(TileArguments *args);
 
 typedef struct TileCallbackInfo
 {
     char *name;
     TileCallbackType type;
-    TileCallback callback;
+    TileCallbackFunction callback;
 } TileCallbackInfo;
+
+typedef struct TileCallback
+{
+    TileCallbackFunction func;
+    TileArguments *args;
+} TileCallback;
 
 /**
  * @brief Initializes the tile callbacks

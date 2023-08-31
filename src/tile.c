@@ -9,7 +9,8 @@ void tile_draw(const Tile *tile, SDL_Renderer *renderer, SDL_FPoint *offset)
                                    offset);
 }
 
-void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture, bool solid, TileCallback callback, TileArguments *args)
+void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture, bool solid,
+               TileCallback callback)
 {
     tile->texture = texture;
 
@@ -28,5 +29,4 @@ void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture, bool solid, T
 
     tile->solid = solid;
     tile->callback = callback;
-    tile->args = args;
 }

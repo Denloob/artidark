@@ -11,7 +11,7 @@ typedef struct TilesetEntry
     bool solid;
     int id;
     SDL_Texture *texture;
-    TileCallback callback;
+    TileCallbackFunction callback;
     TileArguments args;
 } TilesetEntry;
 
@@ -85,10 +85,9 @@ void tileset_destroy(Tileset *tileset);
  * @param id The id of the tile to find.
  * @param[out] texture The texture of the tile.
  * @param[out] solid Whether the tile is solid or not.
- * @param[out] callback The callback function for the tile.
- * @param[out] args The callback arguments for the tile.
+ * @param[out] callback The callback for the tile.
  * @return EXIT_SUCCESS if id exists, EXIT_FAILURE otherwise.
  */
 int tileset_QueryTextureByID(const Tileset *tileset, int id,
                              SDL_Texture **texture, bool *solid,
-                             TileCallback *callback, TileArguments **args);
+                             TileCallback *callback);
