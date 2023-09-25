@@ -76,6 +76,8 @@ typedef char* vec_char;
 
 #define vector_copy(vec) (_vector_copy((vector*)vec, sizeof(*vec)))
 
+#define vector_end(vec) (vec + vector_size(vec))
+
 vector vector_create(void);
 
 void vector_free(vector vec);
