@@ -1,8 +1,11 @@
 #include "SDL.h"
+#include "character.h"
 #include "hashmap.h"
+#include "level.h"
 #include "string.h"
 #include "tile_callback.h"
 #include "utils.h"
+#include "vec.h"
 #include <stdlib.h>
 
 typedef HASHMAP(char, TileCallbackInfo) TileCallbackHashmap;
@@ -64,18 +67,37 @@ const TileCallbackInfo *tile_callback_get(const char *name)
     return hashmap_get(&tileCallbacks, name);
 }
 
-void tile_callback_door(TileArguments *args)
+void tile_callback_door(TileArguments *args, CallbackGameState *game_state)
 {
     SDL_assert(args->type == TILE_CALLBACK_DOOR);
     struct TileCallbackDoorArgument *door = &args->door;
 
-    SDL_Log("tile_callback_door triggered {.destinationLevel=\"%s\"}",
-            door->destinationLevel);
+    Level *level = *game_state->level_ptr;
+
+    LevelLayer *level_layer;
+    vector_foreach(level_layer, level->layers)
+    {
+        vector_iter(tile, level_layer->tiles)
+        {
+            if (tile->texture_id != game_state->tile_texture_id)
+                continue;
+            SDL_FRect *character_hitbox = &game_state->character->hitbox;
+            SDL_FRect *tile_hitbox = &tile->hitbox;
+
+            if (SDL_HasIntersectionF(character_hitbox, tile_hitbox))
+            {
+                SDL_Log(
+                    "The character interacted with the door that goes to %s",
+                    door->destinationLevel);
+                return;
+            }
+        }
+    }
 
     // TODO: not implemented
 }
 
-void tile_callback_none(TileArguments *)
+void tile_callback_none(TileArguments *, CallbackGameState *)
 {
     /* Does nothing. */
 }

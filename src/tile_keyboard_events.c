@@ -93,8 +93,9 @@ void tile_keyboard_events_unsubscribe(KeyEventSubscribers *subscribers,
 }
 
 void tile_keyboard_events_notify(KeyEventSubscribers *subscribers,
-                                 SDL_Keycode key)
+                                 SDL_Keycode key, CallbackGameState *game_info)
 {
+    game_info->key = key;
     TileCallback **subscribed_callbacks = hashmap_get(subscribers, &key);
 
     if (!subscribed_callbacks)
@@ -103,7 +104,8 @@ void tile_keyboard_events_notify(KeyEventSubscribers *subscribers,
     TileCallback *callback;
     vector_foreach(callback, subscribed_callbacks)
     {
+        game_info->tile_texture_id = callback->id;
 
-        callback->func(callback->args);
+        callback->func(callback->args, game_info);
     }
 }

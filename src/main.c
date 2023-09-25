@@ -70,6 +70,11 @@ int main(int argc, char *argv[])
     tile_keyboard_events_subscribe(eventSubscribers, SDLK_e, tileset,
                                    11 /* door tile ID */);
 
+    CallbackGameState callback_game_state = {
+        .level_ptr = &currentLevel,
+        .character = character,
+    };
+
     bool done = false;
     while (!done)
     {
@@ -86,7 +91,8 @@ int main(int argc, char *argv[])
                     break;
                 case SDL_KEYDOWN:
                     tile_keyboard_events_notify(eventSubscribers,
-                                                event.key.keysym.sym);
+                                                event.key.keysym.sym,
+                                                &callback_game_state);
                     /* fallthrough */
                 case SDL_KEYUP:
                     character_handleKeyboardEvent(character, &event.key);

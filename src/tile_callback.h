@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SDL_keycode.h"
 typedef enum TileCallbackType
 {
     TILE_CALLBACK_NONE,
@@ -18,7 +19,16 @@ typedef union TileArguments
     struct TileCallbackDoorArgument door;
 } TileArguments;
 
-typedef void (*TileCallbackFunction)(TileArguments *args);
+typedef struct CallbackGameState
+{
+    struct Character *character;
+    struct Level **level_ptr;
+    SDL_Keycode key;     // Key that triggered the call
+    int tile_texture_id; // The id of the tile for the event
+} CallbackGameState;
+
+typedef void (*TileCallbackFunction)(TileArguments *args,
+                                     CallbackGameState *game_info);
 
 typedef struct TileCallbackInfo
 {
@@ -31,6 +41,7 @@ typedef struct TileCallback
 {
     TileCallbackFunction func;
     TileArguments *args;
+    int id; // The id of the tile
 } TileCallback;
 
 /**
@@ -68,15 +79,16 @@ const TileCallbackInfo *tile_callback_get(const char *name);
  * @brief Called when a door event is triggered
  *
  * @param args Union with struct DoorArgument set.
+ * @param game_state The current state of the game.
  *
  * @see tile_callback_get
  */
-void tile_callback_door(TileArguments *args);
+void tile_callback_door(TileArguments *args, CallbackGameState *game_state);
 
 /**
  * @brief Does nothing
  */
-void tile_callback_none(TileArguments *);
+void tile_callback_none(TileArguments *, CallbackGameState *);
 
 /**
  * @brief Cleans up memory used by the door callback arguments.

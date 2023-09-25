@@ -81,6 +81,10 @@ void tile_keyboard_events_unsubscribe(KeyEventSubscribers *subscribers,
  * @brief Notifies (calls) all the subscribers for a given key with their args.
  *
  * @param key The event keycode subscribers of which to notify.
+ * @param game_state The current state of the game to be used by the callback.
+ *                      The key will be auto set by the key parameter.
+ *                      The id will be also auto set.
  */
 void tile_keyboard_events_notify(KeyEventSubscribers *subscribers,
-                                 SDL_Keycode key);
+                                 SDL_Keycode key,
+                                 CallbackGameState *game_state);
