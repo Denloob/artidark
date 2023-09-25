@@ -98,7 +98,7 @@ void level_fieldParserCallback(void *fieldBytes,
                               layerLoadingData->currentPos.y,
                               w * layerLoadingData->scalingFactor,
                               h * layerLoadingData->scalingFactor},
-                  tileTexture, solid, callback);
+                  tileTexture, callback, id, solid);
         level_layer_add_tile(layerLoadingData->currentLayer, tile);
     }
 

@@ -275,7 +275,7 @@ int tileset_QueryTextureByID(const Tileset *tileset, int id,
             if (solid)
                 *solid = entry->solid;
             if (callback)
-                *callback = (TileCallback){entry->callback, &entry->args};
+                *callback = (TileCallback){entry->callback, &entry->args, id};
 
             return EXIT_SUCCESS;
         }

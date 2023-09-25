@@ -9,10 +9,11 @@ void tile_draw(const Tile *tile, SDL_Renderer *renderer, SDL_FPoint *offset)
                                    offset);
 }
 
-void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture, bool solid,
-               TileCallback callback)
+void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture,
+               TileCallback callback, int texture_id, bool solid)
 {
     tile->texture = texture;
+    tile->texture_id = texture_id;
 
     if (hitbox.w == 0 || hitbox.h == 0)
     {
