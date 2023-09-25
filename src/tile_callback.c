@@ -1,3 +1,4 @@
+#include "SDL.h"
 #include "hashmap.h"
 #include "string.h"
 #include "tile_callback.h"
@@ -65,6 +66,12 @@ const TileCallbackInfo *tile_callback_get(const char *name)
 
 void tile_callback_door(TileArguments *args)
 {
+    SDL_assert(args->type == TILE_CALLBACK_DOOR);
+    struct TileCallbackDoorArgument *door = &args->door;
+
+    SDL_Log("tile_callback_door triggered {.destinationLevel=\"%s\"}",
+            door->destinationLevel);
+
     // TODO: not implemented
 }
 

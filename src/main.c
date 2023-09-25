@@ -5,6 +5,7 @@
 #include "level.h"
 #include "main.h"
 #include "renderer.h"
+#include "tile_keyboard_events.h"
 #include "utils.h"
 #include <errno.h>
 #include <stdlib.h>
@@ -65,6 +66,10 @@ int main(int argc, char *argv[])
 
     SDL_FPoint renderingOffset = {0};
 
+    KeyEventSubscribers *eventSubscribers = tile_keyboard_events_create();
+    tile_keyboard_events_subscribe(eventSubscribers, SDLK_e, tileset,
+                                   11 /* door tile ID */);
+
     bool done = false;
     while (!done)
     {
@@ -80,6 +85,9 @@ int main(int argc, char *argv[])
                     done = true;
                     break;
                 case SDL_KEYDOWN:
+                    tile_keyboard_events_notify(eventSubscribers,
+                                                event.key.keysym.sym);
+                    /* fallthrough */
                 case SDL_KEYUP:
                     character_handleKeyboardEvent(character, &event.key);
             }
@@ -98,6 +106,7 @@ int main(int argc, char *argv[])
         SDL_Delay(FRAME_DURATION);
     }
 
+    tile_keyboard_events_destroy(eventSubscribers);
     unloadLevels(levels);
     character_destroy(character);
     tileset_destroy(tileset);
