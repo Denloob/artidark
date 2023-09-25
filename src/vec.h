@@ -78,7 +78,7 @@ typedef char* vec_char;
 
 #define vector_end(vec) (vec + vector_size(vec))
 
-#define vector_foreach(var, vec)                                               \
+#define vector_iter(var, vec)                                                  \
     for (typeof(vec) var = vec; var < vector_end(vec); var++)
 
 vector vector_create(void);
