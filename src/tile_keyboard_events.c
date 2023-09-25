@@ -43,9 +43,9 @@ void tile_keyboard_events_destroy(KeyEventSubscribers *subscribers)
 
     hashmap_foreach_data(subscribed_callbacks, subscribers)
     {
-        vector_iter(it, subscribed_callbacks)
+        TileCallback *callback;
+        vector_foreach(callback, subscribed_callbacks)
         {
-            TileCallback *callback = *it;
             free(callback);
         }
 
@@ -100,9 +100,9 @@ void tile_keyboard_events_notify(KeyEventSubscribers *subscribers,
     if (!subscribed_callbacks)
         return;
 
-    vector_iter(it, subscribed_callbacks)
+    TileCallback *callback;
+    vector_foreach(callback, subscribed_callbacks)
     {
-        TileCallback *callback = *it;
 
         callback->func(callback->args);
     }

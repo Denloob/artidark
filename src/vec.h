@@ -18,6 +18,11 @@ typedef unsigned char vec_type_t; // stores the number of bytes for a type
 typedef int* vec_int;
 typedef char* vec_char;
 
+#define VECTOR_CONCAT_HELPER(x, y) x##y
+#define VECTOR_CONCAT(x, y) VECTOR_CONCAT_HELPER(x, y)
+#define VECTOR_MAKE_UNIQUE(prefix)                                             \
+    VECTOR_CONCAT(prefix, __COUNTER__)
+
 #ifndef _MSC_VER
 
 // shortcut defines
@@ -80,6 +85,19 @@ typedef char* vec_char;
 
 #define vector_iter(var, vec)                                                  \
     for (typeof(vec) var = vec; var < vector_end(vec); var++)
+
+#define VECTOR_FOREACH_HELPER(it, var, vec)                                    \
+    for (typeof(vec) it = vec; it < vector_end(vec) && ((var = *it) || true);  \
+         it++)
+
+// The var has to be defined before the macro
+// vec is a vector (aka type *).
+#define vector_foreach(var, vec)                                               \
+    _Static_assert(IS_SAME_TYPE(*vec, var),                                    \
+                   "typeof(*" STRINGIFY(vec) ") "                              \
+                                             "!= typeof(" STRINGIFY(var) ")"); \
+    VECTOR_FOREACH_HELPER(VECTOR_MAKE_UNIQUE(__vec_it), (var),                 \
+                          (vec))
 
 vector vector_create(void);
 
