@@ -10,6 +10,7 @@ typedef struct TilesetEntry
 {
     bool solid;
     int id;
+    int class_id;
     SDL_Texture *texture;
     TileCallbackFunction callback;
     TileArguments args;

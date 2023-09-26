@@ -88,3 +88,15 @@ void tile_keyboard_events_unsubscribe(KeyEventSubscribers *subscribers,
 void tile_keyboard_events_notify(KeyEventSubscribers *subscribers,
                                  SDL_Keycode key,
                                  CallbackGameState *game_state);
+
+/**
+ * @brief Loads keyboard mappings from file stream.
+ *
+ * @param stream The file stream to load from.
+ * @param tileset The tileset which will be used for loading the keymap
+ * @return A new map for keyboard events subscribers.
+ *
+ * @see tile_keyboard_events_destroy
+ */
+KeyEventSubscribers *tile_keyboard_mappings_load(FILE *stream,
+                                                 Tileset *tileset);

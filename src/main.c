@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     if (argc < 5)
     {
         die("Usage: %s <Character Texture Path> <Tileset Path> <Textures path> "
+            "<KeyMap path>"
             "<Starting level name> [Level paths...]",
             argv[0]);
     }
@@ -23,9 +24,10 @@ int main(int argc, char *argv[])
     const char *characterTexturePath = argv[1];
     const char *tilesetPath = argv[2];
     const char *texturesDirPath = argv[3];
-    const char *levelName = argv[4];
-    const char **levelPaths = (const char **)(argv + 5);
-    int levelAmount = argc - 5;
+    const char *keymapPath = argv[4];
+    const char *levelName = argv[5];
+    const char **levelPaths = (const char **)(argv + 6);
+    int levelAmount = argc - 6;
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
@@ -46,6 +48,19 @@ int main(int argc, char *argv[])
     if (!tileset)
         die("Loading tileset %s failed", tilesetPath);
 
+    FILE *keymapFile = fopen(keymapPath, "rb");
+
+    if (!keymapFile)
+        die("Opening file %s failed", keymapPath);
+
+    KeyEventSubscribers *eventSubscribers =
+        tile_keyboard_mappings_load(keymapFile, tileset);
+
+    fclose(keymapFile);
+
+    if (!eventSubscribers)
+        die("Loading keymap %s failed", keymapPath);
+
     SDL_Texture *characterTexture =
         IMG_LoadTexture(renderer, characterTexturePath);
     if (!characterTexture)
@@ -65,10 +80,6 @@ int main(int argc, char *argv[])
         die("Level %s not found", levelName);
 
     SDL_FPoint renderingOffset = {0};
-
-    KeyEventSubscribers *eventSubscribers = tile_keyboard_events_create();
-    tile_keyboard_events_subscribe(eventSubscribers, SDLK_e, tileset,
-                                   11 /* door tile ID */);
 
     CallbackGameState callback_game_state = {
         .level_ptr = &currentLevel,

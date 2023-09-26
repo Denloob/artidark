@@ -70,6 +70,7 @@ enum FieldType
 {
     FIELD_ID,
     FIELD_PATH,
+    FIELD_CLASS_ID,
     FIELD_SOLID,
     FIELD_CALLBACK,
 };
@@ -132,6 +133,9 @@ void tileset_fieldParserCallback(void *fieldBytes,
     {
         case FIELD_ID:
             lastEntry->id = atoi(fieldStr);
+            break;
+        case FIELD_CLASS_ID:
+            lastEntry->class_id = atoi(fieldStr);
             break;
         case FIELD_PATH:
         {
