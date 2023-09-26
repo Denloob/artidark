@@ -37,16 +37,16 @@ typedef HASHMAP(char, Level) LevelHashmap;
 /**
  * @brief Loads the levels stored in the given file paths using the given tileset.
  *
- * @param levelPaths Paths to files with the level data.
+ * @param level_paths Paths to files with the level data.
  * @see level_load
- * @param size The size of the levelPaths array.
+ * @param size The size of the level_paths array.
  * @param tileset The tileset to use.
  * @return Dynamically allocated hashmap from level name to the level itself.
  *
- * @see unloadLevels
+ * @see unload_levels
  */
-LevelHashmap *loadLevels(const char **levelPaths, size_t size,
-                         Tileset *tileset);
+LevelHashmap *load_levels(const char **level_paths, size_t size,
+                          Tileset *tileset);
 
 /**
  * @brief Frees and cleans up the levels hashmap, and all the levels it stores.
@@ -54,17 +54,18 @@ LevelHashmap *loadLevels(const char **levelPaths, size_t size,
  * @param levels The levels hashmap to unload.
  * @see level_destroy
  */
-void unloadLevels(LevelHashmap *levels);
+void unload_levels(LevelHashmap *levels);
 
 /**
  * @brief Calculates the offset for rendering so that the character stays on
  *          screen even if it's x/y pos is out of window's borders.
  *
  * @param character The character for which to calculate the offset.
- * @param previousOffset The previous offset for the renderer.
- * @param newOffset[out] The offset for the renderer.
+ * @param previous_offset The previous offset for the renderer.
+ * @param new_offset[out] The offset for the renderer.
  *
- * @see renderer_renderCopyWithOffsetF
+ * @see renderer_render_copy_with_offset_f
  */
-void calculateRenderingOffset(const Character *character,
-                              SDL_FPoint previousOffset, SDL_FPoint *newOffset);
+void calculate_rendering_offset(const Character *character,
+                                SDL_FPoint previous_offset,
+                                SDL_FPoint *new_offset);

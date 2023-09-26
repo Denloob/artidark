@@ -20,11 +20,11 @@ void tileset_entry_cleanup(TilesetEntry *entry)
     tile_callback_args_cleanup(&entry->args);
 }
 
-Tileset *tileset_create(char *textureDirPath)
+Tileset *tileset_create(char *texture_dir_path)
 {
     Tileset *tileset = xmalloc(sizeof(*tileset));
     tileset->entries = vector_create();
-    tileset->textureDirPath = textureDirPath;
+    tileset->texture_dir_path = texture_dir_path;
 
     return tileset;
 }
@@ -37,7 +37,7 @@ void tileset_destroy(Tileset *tileset)
     }
 
     vector_free(tileset->entries);
-    free(tileset->textureDirPath);
+    free(tileset->texture_dir_path);
 
     free(tileset);
 }
@@ -50,22 +50,24 @@ void tileset_destroy(Tileset *tileset)
  * @param dir_separator The char used to separate the paths.
  * @return The concatenated path (dynamically allocated).
  */
-char *concatPath(const char *path1, const char *path2, const char pathSeparator)
+char *concat_path(const char *path1, const char *path2,
+                  const char path_separator)
 {
-    bool dirSepNeeded = path1[strlen(path1) - 1] != pathSeparator;
+    bool dir_sep_needed = path1[strlen(path1) - 1] != path_separator;
 
-    char *path = xmalloc(strlen(path1) + (int)dirSepNeeded + strlen(path2) + 1);
+    char *path =
+        xmalloc(strlen(path1) + (int)dir_sep_needed + strlen(path2) + 1);
 
     strcpy(path, path1);
-    if (dirSepNeeded)
-        strcat(path, (char[]){pathSeparator, '\0'});
+    if (dir_sep_needed)
+        strcat(path, (char[]){path_separator, '\0'});
     strcat(path, path2);
 
     return path;
 }
 
 // NOTE: if you prepend a type to the enum,
-// you must modify `tileset_rowParserCallback` and `tileset_load`
+// you must modify `tileset_row_parser_callback` and `tileset_load`
 enum FieldType
 {
     FIELD_ID,
@@ -95,88 +97,90 @@ typedef vec_char *vec_str;
  * @return Vector of strings (char vectors).
  *      All managed by the caller.
  */
-vec_str strSplit(const char *str, char ch)
+vec_str str_split(const char *str, char ch)
 {
     vec_str tokens = vector_create();
 
-    vec_char currString = vector_create();
+    vec_char curr_string = vector_create();
 
     do
     {
         if (*str == ch || *str == '\0')
         {
-            vector_add(&currString, '\0');
-            vector_add(&tokens, currString);
-            currString = vector_create();
+            vector_add(&curr_string, '\0');
+            vector_add(&tokens, curr_string);
+            curr_string = vector_create();
             continue;
         }
 
-        vector_add(&currString, *str);
+        vector_add(&curr_string, *str);
     } while (*str++);
 
-    vector_free(currString);
+    vector_free(curr_string);
     return tokens;
 }
 
-void tileset_fieldParserCallback(void *fieldBytes,
+void tileset_field_parser_callback(void *field_bytes,
                                  size_t _ __attribute__((unused)), void *data)
 {
-    struct TilesetLoadingData *tilesetLoadingData = data;
-    Tileset *tileset = tilesetLoadingData->tileset;
-    TilesetEntry *lastEntry =
+    struct TilesetLoadingData *tileset_loading_data = data;
+    Tileset *tileset = tileset_loading_data->tileset;
+    TilesetEntry *last_entry =
         &tileset->entries[vector_size(tileset->entries) - 1];
 
     // Field str will be null terminated (csv_parser option)
-    const char *fieldStr = fieldBytes;
+    const char *field_str = field_bytes;
 
-    switch (tilesetLoadingData->type)
+    switch (tileset_loading_data->type)
     {
         case FIELD_ID:
-            lastEntry->id = atoi(fieldStr);
+            last_entry->id = atoi(field_str);
             break;
         case FIELD_CLASS_ID:
-            lastEntry->class_id = atoi(fieldStr);
+            last_entry->class_id = atoi(field_str);
             break;
         case FIELD_PATH:
         {
-            char *texturePath =
-                concatPath(tileset->textureDirPath, fieldStr, DIR_SEPARATOR);
+            char *texture_path = concat_path(tileset->texture_dir_path,
+                                             field_str, DIR_SEPARATOR);
 
-            lastEntry->texture =
-                IMG_LoadTexture(tilesetLoadingData->renderer, texturePath);
+            last_entry->texture =
+                IMG_LoadTexture(tileset_loading_data->renderer, texture_path);
 
-            free(texturePath);
+            free(texture_path);
             break;
         }
         case FIELD_SOLID:
-            lastEntry->solid = atoi(fieldStr) != 0;
+            last_entry->solid = atoi(field_str) != 0;
             break;
         case FIELD_CALLBACK:
         {
-            vec_str callback_tokens = strSplit(fieldStr, ' ');
+            vec_str callback_tokens = str_split(field_str, ' ');
 
-            vec_char commandName = callback_tokens[0];
-            const TileCallbackInfo *callbackInfo =
-                tile_callback_get(commandName);
+            vec_char command_name = callback_tokens[0];
+            const TileCallbackInfo *callback_info =
+                tile_callback_get(command_name);
 
-            TileCallbackFunction callback = callbackInfo->callback;
+            TileCallbackFunction callback = callback_info->callback;
             SDL_assert(callback != NULL);
 
-            TileArguments callbackArgs;
+            TileArguments callback_args;
             if (vector_size(callback_tokens) > 1)
             {
                 /* It's not a vec_str anymore, but a (vec_char *).
                  * Because we added +1, all the `vector_` functions will produce
                  * undefined behavior. */
-                vec_char *commandArgsTokens = callback_tokens + 1;
-                size_t commandArgsTokensSize = vector_size(callback_tokens) - 1;
+                vec_char *command_args_tokens = callback_tokens + 1;
+                size_t command_args_tokens_size =
+                    vector_size(callback_tokens) - 1;
 
-                switch (callbackInfo->type)
+                switch (callback_info->type)
                 {
                     case TILE_CALLBACK_DOOR:
-                        SDL_assert(commandArgsTokensSize == 1);
-                        callbackArgs.door = (struct TileCallbackDoorArgument){
-                            .destinationLevel = strdup(commandArgsTokens[0])};
+                        SDL_assert(command_args_tokens_size == 1);
+                        callback_args.door = (struct TileCallbackDoorArgument){
+                            .destination_level =
+                                strdup(command_args_tokens[0])};
                         break;
                     case TILE_CALLBACK_NONE:
                         /* TODO: we probably want to raise a warning or something,
@@ -184,7 +188,7 @@ void tileset_fieldParserCallback(void *fieldBytes,
                         break;
                 }
             }
-            callbackArgs.type = callbackInfo->type;
+            callback_args.type = callback_info->type;
 
             for (size_t i = 0; i < vector_size(callback_tokens); i++)
             {
@@ -192,25 +196,25 @@ void tileset_fieldParserCallback(void *fieldBytes,
             }
             vector_free(callback_tokens);
 
-            lastEntry->callback = callback;
-            lastEntry->args = callbackArgs;
+            last_entry->callback = callback;
+            last_entry->args = callback_args;
             break;
         }
     }
 
     // Change type to the next field type, as the enum is in order.
     // It will be reset back to the first type when row end is reached.
-    tilesetLoadingData->type++;
+    tileset_loading_data->type++;
 }
 
-void tileset_rowParserCallback(int _ __attribute__((unused)), void *data)
+void tileset_row_parser_callback(int _ __attribute__((unused)), void *data)
 {
-    struct TilesetLoadingData *tilesetLoadingData = data;
-    vector_add(&tilesetLoadingData->tileset->entries, (TilesetEntry){0});
-    tilesetLoadingData->type = FIELD_ID; // Reset the type to the first one
+    struct TilesetLoadingData *tileset_loading_data = data;
+    vector_add(&tileset_loading_data->tileset->entries, (TilesetEntry){0});
+    tileset_loading_data->type = FIELD_ID; // Reset the type to the first one
 }
 
-Tileset *tileset_load(FILE *stream, char *textureDirPath,
+Tileset *tileset_load(FILE *stream, char *texture_dir_path,
                       SDL_Renderer *renderer)
 {
     struct csv_parser parser;
@@ -227,22 +231,22 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
      * For each row, we append new entry to the vector.
      * For each field, we check what type of field it is, and write it.
      */
-    struct TilesetLoadingData tilesetLoadingData = {
+    struct TilesetLoadingData tileset_loading_data = {
         .renderer = renderer,
-        .tileset = tileset_create(textureDirPath),
+        .tileset = tileset_create(texture_dir_path),
         .type = FIELD_ID};
-    vector_add(&tilesetLoadingData.tileset->entries, (TilesetEntry){0});
+    vector_add(&tileset_loading_data.tileset->entries, (TilesetEntry){0});
 
     char buf[1024] = {0};
-    size_t bytesRead = 0;
-    while ((bytesRead = fread(buf, 1, sizeof(buf), stream)) > 0)
+    size_t bytes_read = 0;
+    while ((bytes_read = fread(buf, 1, sizeof(buf), stream)) > 0)
     {
 
-        if (csv_parse(&parser, buf, bytesRead, tileset_fieldParserCallback,
-                      tileset_rowParserCallback,
-                      &tilesetLoadingData) != bytesRead)
+        if (csv_parse(&parser, buf, bytes_read, tileset_field_parser_callback,
+                      tileset_row_parser_callback,
+                      &tileset_loading_data) != bytes_read)
         {
-            tileset_destroy(tilesetLoadingData.tileset);
+            tileset_destroy(tileset_loading_data.tileset);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                      "Error during level parsing",
                                      csv_strerror(csv_error(&parser)), 0);
@@ -250,22 +254,22 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
         }
     }
 
-    csv_fini(&parser, tileset_fieldParserCallback, tileset_rowParserCallback,
-             &tilesetLoadingData);
+    csv_fini(&parser, tileset_field_parser_callback, tileset_row_parser_callback,
+             &tileset_loading_data);
     csv_free(&parser);
     tile_callback_cleanup();
 
     // Pop the empty entry added by the loading algorithm
     // NOLINTNEXTLINE(bugprone-sizeof-expression)
-    vector_remove(&tilesetLoadingData.tileset->entries,
-                  vector_size(tilesetLoadingData.tileset->entries) - 1);
+    vector_remove(&tileset_loading_data.tileset->entries,
+                  vector_size(tileset_loading_data.tileset->entries) - 1);
 
-    return tilesetLoadingData.tileset;
+    return tileset_loading_data.tileset;
 }
 
-int tileset_QueryTextureByID(const Tileset *tileset, int id,
-                             SDL_Texture **texture, bool *solid,
-                             TileCallback *callback)
+int tileset_query_texture_by_id(const Tileset *tileset, int id,
+                                SDL_Texture **texture, bool *solid,
+                                TileCallback *callback)
 {
     TilesetEntry *entries_end =
         tileset->entries + vector_size(tileset->entries);

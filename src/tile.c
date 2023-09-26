@@ -5,8 +5,8 @@
 
 void tile_draw(const Tile *tile, SDL_Renderer *renderer, SDL_FPoint *offset)
 {
-    renderer_renderCopyWithOffsetF(renderer, tile->texture, NULL, &tile->hitbox,
-                                   offset);
+    renderer_render_copy_with_offset_f(renderer, tile->texture, NULL,
+                                       &tile->hitbox, offset);
 }
 
 void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture,

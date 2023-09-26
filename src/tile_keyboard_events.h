@@ -7,25 +7,25 @@
 #include "utils.h"
 
 /**
- * @brief Convenience macro to subscribe a tile type (textureID) from a
+ * @brief Convenience macro to subscribe a tile type (texture_id) from a
  *          tileset to a key.
  *
  * @param subscribers (KeyEventSubscribers *)
  * @param key (SDL_Keycode) The event keycode to subscribe to.
  * @param tileset (const Tileset *) The tileset from which to query the TileCallback.
- * @param textureID (int) The textureID for which to look up the TileCallback.
+ * @param texture_id (int) The texture_id for which to look up the TileCallback.
  *
  * @see tile_keyboard_events_subscribe_dynamic
  * @see tile_keyboard_events_unsubscribe
  */
-#define tile_keyboard_events_subscribe(subscribers, key, tileset, textureID)   \
+#define tile_keyboard_events_subscribe(subscribers, key, tileset, texture_id)  \
     do                                                                         \
     {                                                                          \
-        TileCallback *tileCallback = xmalloc(sizeof(*tileCallback));           \
-        tileset_QueryTextureByID(tileset, textureID, NULL, NULL,               \
-                                 tileCallback);                                \
+        TileCallback *tile_callback = xmalloc(sizeof(*tile_callback));         \
+        tileset_query_texture_by_id(tileset, texture_id, NULL, NULL,           \
+                                    tile_callback);                            \
         tile_keyboard_events_subscribe_dynamic(subscribers, key,               \
-                                               tileCallback);                  \
+                                               tile_callback);                 \
     } while (0)
 
 typedef TileCallback **vec_TileCallback;

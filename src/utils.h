@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define UTILS_READLINE_DEFAULT_STARTING_SIZE 16
 #define UTILS_READLINE_DEFAULT_SCALING_FACTOR 2
@@ -33,13 +33,13 @@ void *xrealloc(void *ptr, size_t size);
  *
  *
  * @param stream The stream to read from.
- * @param eolChar The character up until which to read.
+ * @param eol_char The character up until which to read.
  *                  (Is not included in the result string).
- * @param startingSize The starting size of the buffer. If 0, the default is
+ * @param starting_size The starting size of the buffer. If 0, the default is
  *                      used.
- * @param scalingFactor The scaling factor to apply to the buffer. If 0, the
+ * @param scaling_factor The scaling factor to apply to the buffer. If 0, the
  *                       default is used.
  * @return Dynamicly allocated and null terminated string which was read.
  */
-char *readline(FILE *stream, const char eolChar, size_t startingSize,
-                size_t scalingFactor);
+char *readline(FILE *stream, const char eol_char, size_t starting_size,
+               size_t scaling_factor);

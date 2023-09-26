@@ -9,8 +9,8 @@ typedef enum TileCallbackType
 
 struct TileCallbackDoorArgument
 {
-    TileCallbackType type;  // TILE_CALLBACK_DOOR
-    char *destinationLevel; // The name of the level where this door leads too.
+    TileCallbackType type;   // TILE_CALLBACK_DOOR
+    char *destination_level; // The name of the level where this door leads too.
 };
 
 typedef union TileArguments

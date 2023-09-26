@@ -21,8 +21,8 @@ typedef TilesetEntry *VecTilesetEntry;
 typedef struct Tileset
 {
     VecTilesetEntry entries;
-    char *textureDirPath; // Path which will be used to find path to
-                          // textures in the csv
+    char *texture_dir_path; // Path which will be used to find path to
+                            // textures in the csv
 } Tileset;
 
 /**
@@ -45,21 +45,21 @@ void tileset_entry_cleanup(TilesetEntry *entry);
 /**
  * @brief Creates a tileset from a csv stream.
  *
- * @param stream The csv stream where each row is `id,texturePath`.
- * @param textureDirPath The path to the texture directory. (Managed by the tileset)
+ * @param stream The csv stream where each row is `id,texture_path`.
+ * @param texture_dir_path The path to the texture directory. (Managed by the tileset)
  * @see Tileset
  * @param renderer The renderer to use to load the textures.
  * @return The created tileset.
  *
  * @see tileset_destroy
  */
-Tileset *tileset_load(FILE *stream, char *textureDirPath,
+Tileset *tileset_load(FILE *stream, char *texture_dir_path,
                       SDL_Renderer *renderer);
 
 /**
  * @brief Creates a tileset
  *
- * @param textureDirPath The path to the texture directory. (Managed by the tileset)
+ * @param texture_dir_path The path to the texture directory. (Managed by the tileset)
  * @see Tileset
  * @return The created tileset.
  *
@@ -70,11 +70,11 @@ Tileset *tileset_load(FILE *stream, char *textureDirPath,
  *
  * @see tileset_destroy
  */
-Tileset *tileset_create(char *textureDirPath);
+Tileset *tileset_create(char *texture_dir_path);
 
 /**
  * @brief Destroys a tileset.
- * @warning Destroys the textures, frees the textureDirPath and the
+ * @warning Destroys the textures, frees the texture_dir_path and the
  *           TileArguments.
  */
 void tileset_destroy(Tileset *tileset);
@@ -89,6 +89,6 @@ void tileset_destroy(Tileset *tileset);
  * @param[out] callback The callback for the tile.
  * @return EXIT_SUCCESS if id exists, EXIT_FAILURE otherwise.
  */
-int tileset_QueryTextureByID(const Tileset *tileset, int id,
-                             SDL_Texture **texture, bool *solid,
-                             TileCallback *callback);
+int tileset_query_texture_by_id(const Tileset *tileset, int id,
+                                SDL_Texture **texture, bool *solid,
+                                TileCallback *callback);

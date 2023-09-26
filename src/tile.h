@@ -37,6 +37,6 @@ void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture,
  * @param renderer The renderer to draw onto.
  * @param offset The offset to apply to the tile's x and y.
  *
- * @see renderer_renderCopyWithOffsetF
+ * @see renderer_render_copy_with_offset_f
  */
 void tile_draw(const Tile *tile, SDL_Renderer *renderer, SDL_FPoint *offset);

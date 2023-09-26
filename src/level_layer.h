@@ -38,4 +38,5 @@ void level_layer_add_tile(LevelLayer *layer, Tile tile);
  *
  * @see tile_draw
  */
-void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer, SDL_FPoint *offset);
+void level_layer_draw(const LevelLayer *layer, SDL_Renderer *renderer,
+                      SDL_FPoint *offset);

@@ -24,8 +24,8 @@ typedef struct Character
     SDL_FPoint velocity;
     SDL_Texture *texture;
     int speed;
-    int jumpStrength;
-    CharacterMovementDirection movementDirection;
+    int jump_strength;
+    CharacterMovementDirection movement_direction;
     CharacterCollisionDirection collisions;
 } Character;
 
@@ -42,13 +42,13 @@ typedef void (*MovementFunction)(Character *, CharacterMovementDirection);
  *                  calculations.
  *               When drawing, the texture will be stretched to fit the hitbox.
  * @param speed The speed of the character.
- * @param jumpStrength The jump strength of the character.
- * @param scalingFactor The scaling factor to apply to the hitbox width and
+ * @param jump_strength The jump strength of the character.
+ * @param scaling_factor The scaling factor to apply to the hitbox width and
  *                      height.
  * @return The created character
  */
 Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
-                            int jumpStrength, int scalingFactor);
+                            int jump_strength, int scaling_factor);
 
 /**
  * @brief Destroys the character
@@ -71,7 +71,7 @@ void character_clamp_velocity(Character *character, float max_velocity);
  * @param renderer The renderer to draw onto.
  * @param offset By how much to offset character's position on the screen.
  *
- * @see renderer_renderCopyWithOffsetF
+ * @see renderer_render_copy_with_offset_f
  */
 void character_draw(const Character *character, SDL_Renderer *renderer,
                     SDL_FPoint *offset);
@@ -93,7 +93,7 @@ void character_tick(Character *character, const VecLevelLayer layers,
  * @param layers Layers vector which contain tiles with which the player could
  *                  have collided.
  */
-void character_tickMovement(Character *character, const VecLevelLayer layers);
+void character_tick_movement(Character *character, const VecLevelLayer layers);
 
 /**
  * @brief Sets character's movement to the given direction, while keeping the
@@ -102,16 +102,16 @@ void character_tickMovement(Character *character, const VecLevelLayer layers);
  * @param direction The direction to move to.
  * @see CharacterMoveDirection
  */
-void character_setMovement(Character *character,
-                           CharacterMovementDirection direction);
+void character_set_movement(Character *character,
+                            CharacterMovementDirection direction);
 
 /**
  * @brief Un-sets character's movement to the given direction.
  *
  * @param direction The direction to unset.
  */
-void character_unsetMovement(Character *character,
-                             CharacterMovementDirection direction);
+void character_unset_movement(Character *character,
+                              CharacterMovementDirection direction);
 
 /**
  * @brief Sets the character's collisions to the given collision, while keeping
@@ -120,30 +120,30 @@ void character_unsetMovement(Character *character,
  * @param The collision direction to set.
  * @see CharacterCollisionDirection
  */
-void character_setCollision(Character *character,
-                            CharacterCollisionDirection direction);
+void character_set_collision(Character *character,
+                             CharacterCollisionDirection direction);
 
 /**
  * @brief Un-sets the character's collisions to the given direction.
  *
  * @param The collision direction to unset.
  */
-void character_unsetCollision(Character *character,
-                              CharacterCollisionDirection direction);
+void character_unset_collision(Character *character,
+                               CharacterCollisionDirection direction);
 
 /**
  * @brief Checks if the character is currently standing (touching) the ground.
  *
  * @return True if yes, false otherwise.
  */
-bool character_isOnGround(Character *character);
+bool character_is_on_ground(Character *character);
 
 /**
  * @brief Handles keyboard events (KEYDOWN / KEYUP) related to the character.
  *
  * @param event The keyboard event.
  */
-void character_handleKeyboardEvent(Character *character,
+void character_handle_keyboard_event(Character *character,
                                    SDL_KeyboardEvent *event);
 
 /**
@@ -151,7 +151,7 @@ void character_handleKeyboardEvent(Character *character,
  *
  * @param gravity The acceleration of gravity.
  */
-void character_applyGravity(Character *character, float gravity);
+void character_apply_gravity(Character *character, float gravity);
 
 /**
  * @brief Finds the collisions between the character and the tiles.
@@ -159,22 +159,22 @@ void character_applyGravity(Character *character, float gravity);
  * @param tiles The tiles to find collisions with.
  * @return Vector of pointers to all the tiles player collides with.
  */
-VecTile *character_findCollisions(const Character *character,
-                                  const VecTile tiles);
+VecTile *character_find_collisions(const Character *character,
+                                   const VecTile tiles);
 
 /**
  * @brief Finds the collisions between the character and the tiles in layers.
  *
  * @param layers Layers vector which contain tiles to find collision with.
  * @return Vector of pointers to all the tiles player collides with.
- * @see character_findCollisions
+ * @see character_find_collisions
  */
-VecTile *character_findCollisionsWithLayerTiles(const Character *character,
-                                                const VecLevelLayer layers);
+VecTile *character_find_collisions_with_layer_tiles(const Character *character,
+                                                    const VecLevelLayer layers);
 
 /**
  * @brief Gets the character position as an SDL_FPoint.
  *
  * @return SDL_FPoint representing character's position.
  */
-SDL_FPoint character_getPosition(const Character *character);
+SDL_FPoint character_get_position(const Character *character);

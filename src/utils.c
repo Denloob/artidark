@@ -33,28 +33,28 @@ void *xrealloc(void *ptr, size_t size)
     return p;
 }
 
-char *readline(FILE *stream, const char eolChar, size_t startingSize,
-                size_t scalingFactor)
+char *readline(FILE *stream, const char eol_char, size_t starting_size,
+               size_t scaling_factor)
 {
-    if (!startingSize)
-        startingSize = UTILS_READLINE_DEFAULT_STARTING_SIZE;
+    if (!starting_size)
+        starting_size = UTILS_READLINE_DEFAULT_STARTING_SIZE;
 
-    if (!scalingFactor)
-        scalingFactor = UTILS_READLINE_DEFAULT_SCALING_FACTOR;
+    if (!scaling_factor)
+        scaling_factor = UTILS_READLINE_DEFAULT_SCALING_FACTOR;
 
     size_t len = 0;
-    size_t size = startingSize;
+    size_t size = starting_size;
     char ch = 0;
-    char *str = (char *)malloc(sizeof(char) * startingSize);
+    char *str = (char *)malloc(sizeof(char) * starting_size);
 
-    while ((ch = fgetc(stream)) != EOF && ch != eolChar)
+    while ((ch = fgetc(stream)) != EOF && ch != eol_char)
     {
         str[len] = ch;
 
         len++;
 
         if (len == size)
-            str = xrealloc(str, size *= scalingFactor);
+            str = xrealloc(str, size *= scaling_factor);
     }
 
     str[len] = '\0';

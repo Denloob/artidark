@@ -21,68 +21,68 @@ int main(int argc, char *argv[])
             argv[0]);
     }
 
-    const char *characterTexturePath = argv[1];
-    const char *tilesetPath = argv[2];
-    const char *texturesDirPath = argv[3];
-    const char *keymapPath = argv[4];
-    const char *levelName = argv[5];
-    const char **levelPaths = (const char **)(argv + 6);
-    int levelAmount = argc - 6;
+    const char *character_texture_path = argv[1];
+    const char *tileset_path = argv[2];
+    const char *textures_dir_path = argv[3];
+    const char *keymap_path = argv[4];
+    const char *level_name = argv[5];
+    const char **level_paths = (const char **)(argv + 6);
+    int level_amount = argc - 6;
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
-    if (initSDL(&window, &renderer, WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (init_SDL(&window, &renderer, WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
         die("Init SDL failed");
 
-    FILE *tilesetFile = fopen(tilesetPath, "rb");
+    FILE *tileset_file = fopen(tileset_path, "rb");
 
-    if (!tilesetFile)
-        die("Opening file %s failed", tilesetPath);
+    if (!tileset_file)
+        die("Opening file %s failed", tileset_path);
 
     Tileset *tileset =
-        tileset_load(tilesetFile, strdup(texturesDirPath), renderer);
+        tileset_load(tileset_file, strdup(textures_dir_path), renderer);
 
-    fclose(tilesetFile);
+    fclose(tileset_file);
 
     if (!tileset)
-        die("Loading tileset %s failed", tilesetPath);
+        die("Loading tileset %s failed", tileset_path);
 
-    FILE *keymapFile = fopen(keymapPath, "rb");
+    FILE *keymap_file = fopen(keymap_path, "rb");
 
-    if (!keymapFile)
-        die("Opening file %s failed", keymapPath);
+    if (!keymap_file)
+        die("Opening file %s failed", keymap_path);
 
-    KeyEventSubscribers *eventSubscribers =
-        tile_keyboard_mappings_load(keymapFile, tileset);
+    KeyEventSubscribers *event_subscribers =
+        tile_keyboard_mappings_load(keymap_file, tileset);
 
-    fclose(keymapFile);
+    fclose(keymap_file);
 
-    if (!eventSubscribers)
-        die("Loading keymap %s failed", keymapPath);
+    if (!event_subscribers)
+        die("Loading keymap %s failed", keymap_path);
 
-    SDL_Texture *characterTexture =
-        IMG_LoadTexture(renderer, characterTexturePath);
-    if (!characterTexture)
-        die("Loading %s failed", characterTexturePath);
+    SDL_Texture *character_texture =
+        IMG_LoadTexture(renderer, character_texture_path);
+    if (!character_texture)
+        die("Loading %s failed", character_texture_path);
 
     int w, h;
-    SDL_QueryTexture(characterTexture, NULL, NULL, &w, &h);
+    SDL_QueryTexture(character_texture, NULL, NULL, &w, &h);
 
     Character *character = character_create(
-        characterTexture, (SDL_FRect){0, 0, w, h}, CHARACTER_SPEED,
+        character_texture, (SDL_FRect){0, 0, w, h}, CHARACTER_SPEED,
         CHARACTER_JUMP_STRENGTH, SCALING_FACTOR);
 
-    LevelHashmap *levels = loadLevels(levelPaths, levelAmount, tileset);
+    LevelHashmap *levels = load_levels(level_paths, level_amount, tileset);
 
-    Level *currentLevel = hashmap_get(levels, levelName);
-    if (!currentLevel)
-        die("Level %s not found", levelName);
+    Level *current_level = hashmap_get(levels, level_name);
+    if (!current_level)
+        die("Level %s not found", level_name);
 
-    SDL_FPoint renderingOffset = {0};
+    SDL_FPoint rendering_offset = {0};
 
     CallbackGameState callback_game_state = {
-        .level_ptr = &currentLevel,
+        .level_ptr = &current_level,
         .character = character,
     };
 
@@ -101,33 +101,34 @@ int main(int argc, char *argv[])
                     done = true;
                     break;
                 case SDL_KEYDOWN:
-                    tile_keyboard_events_notify(eventSubscribers,
+                    tile_keyboard_events_notify(event_subscribers,
                                                 event.key.keysym.sym,
                                                 &callback_game_state);
                     /* fallthrough */
                 case SDL_KEYUP:
-                    character_handleKeyboardEvent(character, &event.key);
+                    character_handle_keyboard_event(character, &event.key);
             }
         }
 
-        character_applyGravity(character, GRAVITY);
-        character_tick(character, currentLevel->layers, MAX_ACCELERATION);
+        character_apply_gravity(character, GRAVITY);
+        character_tick(character, current_level->layers, MAX_ACCELERATION);
 
-        calculateRenderingOffset(character, renderingOffset, &renderingOffset);
+        calculate_rendering_offset(character, rendering_offset,
+                                   &rendering_offset);
 
-        level_draw(currentLevel, renderer, &renderingOffset);
+        level_draw(current_level, renderer, &rendering_offset);
 
-        character_draw(character, renderer, &renderingOffset);
+        character_draw(character, renderer, &rendering_offset);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(FRAME_DURATION);
     }
 
-    tile_keyboard_events_destroy(eventSubscribers);
-    unloadLevels(levels);
+    tile_keyboard_events_destroy(event_subscribers);
+    unload_levels(levels);
     character_destroy(character);
     tileset_destroy(tileset);
-    SDL_DestroyTexture(characterTexture);
+    SDL_DestroyTexture(character_texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -135,39 +136,42 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-void calculateRenderingOffset(const Character *character,
-                              const SDL_FPoint previousOffset,
-                              SDL_FPoint *newOffset)
+void calculate_rendering_offset(const Character *character,
+                                const SDL_FPoint previous_offset,
+                                SDL_FPoint *new_offset)
 {
-    const SDL_FPoint characterPos = character_getPosition(character);
+    const SDL_FPoint character_pos = character_get_position(character);
 
-    const SDL_FPoint onScreenPos = {characterPos.x + previousOffset.x,
-                                    characterPos.y + previousOffset.y};
+    const SDL_FPoint on_screen_pos = {character_pos.x + previous_offset.x,
+                                      character_pos.y + previous_offset.y};
 
-    float leftBoundary = CHARACTER_SCROLL_BORDER_HORIZONTAL;
-    float rightBoundary = WINDOW_WIDTH - CHARACTER_SCROLL_BORDER_HORIZONTAL;
+    float left_boundary = CHARACTER_SCROLL_BORDER_HORIZONTAL;
+    float right_boundary = WINDOW_WIDTH - CHARACTER_SCROLL_BORDER_HORIZONTAL;
 
-    newOffset->x = -(characterPos.x -
-                     SDL_clamp(onScreenPos.x, leftBoundary, rightBoundary));
+    new_offset->x =
+        -(character_pos.x -
+          SDL_clamp(on_screen_pos.x, left_boundary, right_boundary));
 
-    leftBoundary = CHARACTER_SCROLL_BORDER_VERTICAL;
-    rightBoundary = WINDOW_HEIGHT - CHARACTER_SCROLL_BORDER_VERTICAL;
+    left_boundary = CHARACTER_SCROLL_BORDER_VERTICAL;
+    right_boundary = WINDOW_HEIGHT - CHARACTER_SCROLL_BORDER_VERTICAL;
 
-    newOffset->y = -(characterPos.y -
-                     SDL_clamp(onScreenPos.y, leftBoundary, rightBoundary));
+    new_offset->y =
+        -(character_pos.y -
+          SDL_clamp(on_screen_pos.y, left_boundary, right_boundary));
 }
 
-LevelHashmap *loadLevels(const char **levelPaths, size_t size, Tileset *tileset)
+LevelHashmap *load_levels(const char **level_paths, size_t size,
+                          Tileset *tileset)
 {
     LevelHashmap *levels = malloc(sizeof(*levels));
     hashmap_init(levels, hashmap_hash_string, strcmp);
 
     for (size_t i = 0; i < size; i++)
     {
-        FILE *file = fopen(levelPaths[i], "rb");
+        FILE *file = fopen(level_paths[i], "rb");
 
         if (!file)
-            die("Opening file %s failed", levelPaths[i]);
+            die("Opening file %s failed", level_paths[i]);
 
         Level *level =
             level_load(file, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
@@ -187,7 +191,7 @@ LevelHashmap *loadLevels(const char **levelPaths, size_t size, Tileset *tileset)
     return levels;
 }
 
-void unloadLevels(LevelHashmap *levels)
+void unload_levels(LevelHashmap *levels)
 {
     const char *key;
     void *temp;

@@ -38,7 +38,7 @@ void level_draw(const Level *level, SDL_Renderer *renderer, SDL_FPoint *offset)
     }
 }
 
-void level_addLayer(Level *level, LevelLayer *layer)
+void level_add_layer(Level *level, LevelLayer *layer)
 {
     // NOLINTNEXTLINE(bugprone-sizeof-expression)
     vector_add(&level->layers, layer);
@@ -51,7 +51,7 @@ void level_addLayer(Level *level, LevelLayer *layer)
  * @param size Array's size
  * @return The index of ch or `size` if ch is not in the array.
  */
-size_t indexOf(char *arr, size_t size, char ch)
+size_t index_of(char *arr, size_t size, char ch)
 {
     for (size_t i = 0; i < size; i++)
     {
@@ -64,58 +64,58 @@ size_t indexOf(char *arr, size_t size, char ch)
 
 struct LayerLoadingData
 {
-    const int tileWidth, tileHeight;
-    SDL_Point currentPos;
-    LevelLayer *currentLayer;
+    const int tile_width, tile_height;
+    SDL_Point current_pos;
+    LevelLayer *current_layer;
     const Tileset *tileset;
-    int scalingFactor;
+    int scaling_factor;
 };
 
-void level_fieldParserCallback(void *fieldBytes,
-                               size_t _ __attribute__((unused)), void *data)
+void level_field_parser_callback(void *field_bytes,
+                                 size_t _ __attribute__((unused)), void *data)
 {
-    struct LayerLoadingData *layerLoadingData = data;
+    struct LayerLoadingData *layer_loading_data = data;
 
     // Field str will be null terminated (csv_parser option)
-    const char *fieldStr = fieldBytes;
-    int id = atoi(fieldStr);
+    const char *field_str = field_bytes;
+    int id = atoi(field_str);
 
     int w = 0, h = 0;
-    SDL_Texture *tileTexture = NULL;
+    SDL_Texture *tile_texture = NULL;
     bool solid = 0;
     TileCallback callback;
-    if (tileset_QueryTextureByID(layerLoadingData->tileset, id, &tileTexture,
-                                 &solid, &callback))
+    if (tileset_query_texture_by_id(layer_loading_data->tileset, id,
+                                    &tile_texture, &solid, &callback))
     {
         die("Error while loading level:\nNo texture with ID %d", id);
     }
 
-    if (!SDL_QueryTexture(tileTexture, NULL, NULL, &w, &h))
+    if (!SDL_QueryTexture(tile_texture, NULL, NULL, &w, &h))
     {
         Tile tile;
         tile_init(&tile,
-                  (SDL_FRect){layerLoadingData->currentPos.x,
-                              layerLoadingData->currentPos.y,
-                              w * layerLoadingData->scalingFactor,
-                              h * layerLoadingData->scalingFactor},
-                  tileTexture, callback, id, solid);
-        level_layer_add_tile(layerLoadingData->currentLayer, tile);
+                  (SDL_FRect){layer_loading_data->current_pos.x,
+                              layer_loading_data->current_pos.y,
+                              w * layer_loading_data->scaling_factor,
+                              h * layer_loading_data->scaling_factor},
+                  tile_texture, callback, id, solid);
+        level_layer_add_tile(layer_loading_data->current_layer, tile);
     }
 
-    layerLoadingData->currentPos.x +=
-        layerLoadingData->tileWidth * layerLoadingData->scalingFactor;
+    layer_loading_data->current_pos.x +=
+        layer_loading_data->tile_width * layer_loading_data->scaling_factor;
 }
 
-void level_rowParserCallback(int _ __attribute__((unused)), void *data)
+void level_row_parser_callback(int _ __attribute__((unused)), void *data)
 {
-    struct LayerLoadingData *layerLoadingData = data;
-    layerLoadingData->currentPos.x = 0;
-    layerLoadingData->currentPos.y +=
-        layerLoadingData->tileHeight * layerLoadingData->scalingFactor;
+    struct LayerLoadingData *layer_loading_data = data;
+    layer_loading_data->current_pos.x = 0;
+    layer_loading_data->current_pos.y +=
+        layer_loading_data->tile_height * layer_loading_data->scaling_factor;
 }
 
-Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
-                  int tileHeight, int scalingFactor)
+Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
+                  int tile_height, int scaling_factor)
 {
     struct csv_parser parser;
     if (csv_init(&parser, CSV_APPEND_NULL))
@@ -125,23 +125,23 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
         return NULL;
     }
 
-    char *levelName = readline(stream, '\n', 0, 0);
-    Level *level = level_create(levelName);
+    char *level_name = readline(stream, '\n', 0, 0);
+    Level *level = level_create(level_name);
 
-    struct LayerLoadingData layerLoadingData = {.tileWidth = tileWidth,
-                                                .tileHeight = tileHeight,
-                                                .tileset = tileset,
-                                                .scalingFactor = scalingFactor,
-                                                .currentPos = (SDL_Point){0},
-                                                .currentLayer =
-                                                    level_layer_create()};
+    struct LayerLoadingData layer_loading_data = {
+        .tile_width = tile_width,
+        .tile_height = tile_height,
+        .tileset = tileset,
+        .scaling_factor = scaling_factor,
+        .current_pos = (SDL_Point){0},
+        .current_layer = level_layer_create()};
 
     char buf[1024] = {0};
-    size_t bytesRead = 0;
-    while ((bytesRead = fread(buf, 1, sizeof(buf), stream)) > 0)
+    size_t bytes_read = 0;
+    while ((bytes_read = fread(buf, 1, sizeof(buf), stream)) > 0)
     {
-        char *layerBuf = buf;
-        size_t layerSize = 0;
+        char *layer_buf = buf;
+        size_t layer_size = 0;
         /*
          * Note about the following algorithm: We do not care if layer separator
          * comes with a new line, as csv_parse ignores empty lines by default.
@@ -152,38 +152,40 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
          */
         do
         {
-            size_t prevLayerSize = layerSize;
+            size_t prev_layer_size = layer_size;
 
-            layerBuf += prevLayerSize;
-            layerSize = indexOf(layerBuf, bytesRead - prevLayerSize,
-                                LEVEL_LAYER_SEPARATOR);
+            layer_buf += prev_layer_size;
+            layer_size = index_of(layer_buf, bytes_read - prev_layer_size,
+                                  LEVEL_LAYER_SEPARATOR);
 
-            if (csv_parse(&parser, layerBuf, layerSize,
-                          level_fieldParserCallback, level_rowParserCallback,
-                          &layerLoadingData) != layerSize)
+            if (csv_parse(&parser, layer_buf, layer_size,
+                          level_field_parser_callback,
+                          level_row_parser_callback,
+                          &layer_loading_data) != layer_size)
             {
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                          "Error during level parsing",
                                          csv_strerror(csv_error(&parser)), 0);
             }
 
-            bool thereWillBeANewLayer = layerSize != bytesRead - prevLayerSize;
-            if (thereWillBeANewLayer)
+            bool there_will_be_a_new_layer =
+                layer_size != bytes_read - prev_layer_size;
+            if (there_will_be_a_new_layer)
             {
-                level_addLayer(level, layerLoadingData.currentLayer);
-                layerLoadingData.currentLayer = level_layer_create();
-                layerLoadingData.currentPos = (SDL_Point){0};
-                layerSize += 1; // Skip the separator.
+                level_add_layer(level, layer_loading_data.current_layer);
+                layer_loading_data.current_layer = level_layer_create();
+                layer_loading_data.current_pos = (SDL_Point){0};
+                layer_size += 1; // Skip the separator.
             }
 
-        } while (layerBuf + layerSize != buf + bytesRead);
+        } while (layer_buf + layer_size != buf + bytes_read);
     }
 
-    csv_fini(&parser, level_fieldParserCallback, level_rowParserCallback,
-             &layerLoadingData);
+    csv_fini(&parser, level_field_parser_callback, level_row_parser_callback,
+             &layer_loading_data);
     csv_free(&parser);
 
-    level_addLayer(level, layerLoadingData.currentLayer);
+    level_add_layer(level, layer_loading_data.current_layer);
 
     return level;
 }

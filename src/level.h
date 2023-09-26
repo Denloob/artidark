@@ -33,7 +33,7 @@ void level_destroy(Level *level);
  *
  * @param layer The layer to add.
  */
-void level_addLayer(Level *level, LevelLayer *layer);
+void level_add_layer(Level *level, LevelLayer *layer);
 
 /**
  * @brief Draws the level.
@@ -51,10 +51,10 @@ void level_draw(const Level *level, SDL_Renderer *renderer, SDL_FPoint *offset);
  * @param stream The stream to load level from. First line is expected to be
  *                  the name of the level.
  * @param tileset The tileset to use for the textures.
- * @param tileWidth The width of a tile in the level (before scaling).
- * @param tileHeight The height of a tile in the level (before scaling).
- * @param scalingFactor The scaling factor to apply to each tile.
+ * @param tile_width The width of a tile in the level (before scaling).
+ * @param tile_height The height of a tile in the level (before scaling).
+ * @param scaling_factor The scaling factor to apply to each tile.
  * @return The loaded level.
  */
-Level *level_load(FILE *stream, const Tileset *tileset, int tileWidth,
-                  int tileHeight, int scalingFactor);
+Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
+                  int tile_height, int scaling_factor);

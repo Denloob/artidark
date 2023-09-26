@@ -17,70 +17,71 @@
  *
  * @param collisions The collisions between the character and tiles they could
  *                      they could collided with.
- * @param movementDelta Delta of player's movement.
- * @param posAxis `x` or `y`
- * @param sizeAxis `w` or `h`
+ * @param movement_delta Delta of player's movement.
+ * @param pos_axis `x` or `y`
+ * @param size_axis `w` or `h`
  */
-#define character_applyCollisionsAfterMovement(                                \
-    character, collisions, movementDelta, posAxis, sizeAxis)                   \
+#define character_apply_collisions_after_movement(                             \
+    character, collisions, movement_delta, pos_axis, size_axis)                \
     {                                                                          \
         if (vector_size(collisions))                                           \
-            (character->velocity).posAxis = 0;                                 \
-        character_unsetCollision(                                              \
-            character, (CHARACTER_COLLISION_##posAxis##_NEGATIVE) |            \
-                           (CHARACTER_COLLISION_##posAxis##_POSITIVE));        \
-        CharacterCollisionDirection collisionDirection = 0;                    \
+            (character->velocity).pos_axis = 0;                                \
+        character_unset_collision(                                             \
+            character, (CHARACTER_COLLISION_##pos_axis##_NEGATIVE) |           \
+                           (CHARACTER_COLLISION_##pos_axis##_POSITIVE));       \
+        CharacterCollisionDirection collision_direction = 0;                   \
                                                                                \
         for (size_t i = 0; i < vector_size(collisions); i++)                   \
         {                                                                      \
-            if (movementDelta < 0)                                             \
+            if (movement_delta < 0)                                            \
             {                                                                  \
-                (character->hitbox).posAxis =                                  \
-                    (collisions[i]->hitbox).posAxis +                          \
-                    (collisions[i]->hitbox).sizeAxis;                          \
+                (character->hitbox).pos_axis =                                 \
+                    (collisions[i]->hitbox).pos_axis +                         \
+                    (collisions[i]->hitbox).size_axis;                         \
                                                                                \
-                collisionDirection |=                                          \
-                    (CHARACTER_COLLISION_##posAxis##_NEGATIVE);                \
+                collision_direction |=                                         \
+                    (CHARACTER_COLLISION_##pos_axis##_NEGATIVE);               \
             }                                                                  \
-            else if (movementDelta > 0)                                        \
+            else if (movement_delta > 0)                                       \
             {                                                                  \
-                (character->hitbox).posAxis =                                  \
-                    (collisions[i]->hitbox).posAxis -                          \
-                    (character->hitbox).sizeAxis;                              \
+                (character->hitbox).pos_axis =                                 \
+                    (collisions[i]->hitbox).pos_axis -                         \
+                    (character->hitbox).size_axis;                             \
                                                                                \
-                collisionDirection |=                                          \
-                    (CHARACTER_COLLISION_##posAxis##_POSITIVE);                \
+                collision_direction |=                                         \
+                    (CHARACTER_COLLISION_##pos_axis##_POSITIVE);               \
             }                                                                  \
         }                                                                      \
                                                                                \
-        character_setCollision(character, collisionDirection);                 \
+        character_set_collision(character, collision_direction);               \
     }
 
 /** Clamps the velocity of character on given axis between -max_velocity and
  *      +max_velocity.
  */
-#define character_clampVelocityOnAxis(character, axis, max_velocity)           \
+#define character_clamp_velocity_on_axis(character, axis, max_velocity)        \
     {                                                                          \
         (character->velocity).axis = SDL_clamp((character->velocity).axis,     \
                                                -max_velocity, max_velocity);   \
     }
 
-#define character_tickMovementOnAxis(character, layers, applyMovementFunc,     \
-                                     posAxis, sizeAxis)                        \
+#define character_tick_movement_on_axis(                                       \
+    character, layers, apply_movement_func, pos_axis, size_axis)               \
     {                                                                          \
-        float posBeforeMovement = (character)->hitbox.posAxis;                 \
-        applyMovementFunc(character);                                          \
-        float movementDelta = (character)->hitbox.posAxis - posBeforeMovement; \
+        float pos_before_movement = (character)->hitbox.pos_axis;              \
+        apply_movement_func(character);                                        \
+        float movement_delta =                                                 \
+            (character)->hitbox.pos_axis - pos_before_movement;                \
                                                                                \
         VecTile *collisions =                                                  \
-            character_findCollisionsWithLayerTiles(character, layers);         \
-        character_applyCollisionsAfterMovement(                                \
-            character, collisions, movementDelta, posAxis, sizeAxis);          \
+            character_find_collisions_with_layer_tiles(character, layers);     \
+        character_apply_collisions_after_movement(                             \
+            character, collisions, movement_delta, pos_axis, size_axis);       \
         vector_free(collisions);                                               \
     }
 
 Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
-                            int jumpStrength, int scalingFactor)
+                            int jump_strength, int scaling_factor)
 {
     Character *character = xmalloc(sizeof(*character));
 
@@ -97,14 +98,14 @@ Character *character_create(SDL_Texture *texture, SDL_FRect hitbox, int speed,
             hitbox.h = h;
     }
 
-    hitbox.w *= scalingFactor;
-    hitbox.h *= scalingFactor;
+    hitbox.w *= scaling_factor;
+    hitbox.h *= scaling_factor;
 
     character->hitbox = hitbox;
     character->velocity = (SDL_FPoint){0, 0};
-    character->movementDirection = 0;
+    character->movement_direction = 0;
     character->speed = speed;
-    character->jumpStrength = jumpStrength;
+    character->jump_strength = jump_strength;
 
     return character;
 }
@@ -116,18 +117,18 @@ void character_destroy(Character *character)
 
 void character_clamp_velocity(Character *character, float max_velocity)
 {
-    character_clampVelocityOnAxis(character, x, max_velocity);
-    character_clampVelocityOnAxis(character, y, max_velocity);
+    character_clamp_velocity_on_axis(character, x, max_velocity);
+    character_clamp_velocity_on_axis(character, y, max_velocity);
 }
 
 void character_draw(const Character *character, SDL_Renderer *renderer,
                     SDL_FPoint *offset)
 {
-    renderer_renderCopyWithOffsetF(renderer, character->texture, NULL,
-                                   &character->hitbox, offset);
+    renderer_render_copy_with_offset_f(renderer, character->texture, NULL,
+                                       &character->hitbox, offset);
 }
 
-SDL_FPoint character_getPosition(const Character *character)
+SDL_FPoint character_get_position(const Character *character)
 {
     return (SDL_FPoint){character->hitbox.x, character->hitbox.y};
 }
@@ -137,80 +138,80 @@ void character_tick(Character *character, const VecLevelLayer layers,
 {
     character_clamp_velocity(character, max_acceleration);
 
-    character_tickMovement(character, layers);
+    character_tick_movement(character, layers);
 }
 
 /*
  * @brief Applies the horizontal movement the character, without checking for
  *          any collisions.
- * @see character_tickHorizontalMovement
+ * @see character_tick_horizontal_movement
  */
-void character_applyHorizontalMovement(Character *character)
+void character_apply_horizontal_movement(Character *character)
 {
     character->hitbox.x += character->velocity.x;
-    if (character->movementDirection & CHARACTER_MOVE_RIGHT)
+    if (character->movement_direction & CHARACTER_MOVE_RIGHT)
         character->hitbox.x += character->speed;
-    if (character->movementDirection & CHARACTER_MOVE_LEFT)
+    if (character->movement_direction & CHARACTER_MOVE_LEFT)
         character->hitbox.x -= character->speed;
 }
 
-/* @see character_tickMovement */
-void character_tickHorizontalMovement(Character *character,
-                                      const VecLevelLayer layers)
+/* @see character_tick_movement */
+void character_tick_horizontal_movement(Character *character,
+                                        const VecLevelLayer layers)
 {
-    character_tickMovementOnAxis(character, layers,
-                                 character_applyHorizontalMovement, x, w);
+    character_tick_movement_on_axis(character, layers,
+                                    character_apply_horizontal_movement, x, w);
 }
 
 /*
  * @brief Applies the vertical movement the character, without checking for
  *          any collisions.
- * @see character_tickVerticalMovement
+ * @see character_tick_vertical_movement
  */
-void character_applyVerticalMovement(Character *character)
+void character_apply_vertical_movement(Character *character)
 {
     character->hitbox.y += character->velocity.y;
 }
 
-/* @see character_tickMovement */
-void character_tickVerticalMovement(Character *character,
-                                    const VecLevelLayer layers)
+/* @see character_tick_movement */
+void character_tick_vertical_movement(Character *character,
+                                      const VecLevelLayer layers)
 {
-    character_tickMovementOnAxis(character, layers,
-                                 character_applyVerticalMovement, y, h);
+    character_tick_movement_on_axis(character, layers,
+                                    character_apply_vertical_movement, y, h);
 }
 
-void character_tickMovement(Character *character, const VecLevelLayer layers)
+void character_tick_movement(Character *character, const VecLevelLayer layers)
 {
-    character_tickVerticalMovement(character, layers);
-    character_tickHorizontalMovement(character, layers);
+    character_tick_vertical_movement(character, layers);
+    character_tick_horizontal_movement(character, layers);
 }
 
-void character_setMovement(Character *character,
-                           CharacterMovementDirection direction)
+void character_set_movement(Character *character,
+                            CharacterMovementDirection direction)
 {
-    character->movementDirection |= direction;
+    character->movement_direction |= direction;
 }
 
-void character_unsetMovement(Character *character,
-                             CharacterMovementDirection direction)
+void character_unset_movement(Character *character,
+                              CharacterMovementDirection direction)
 {
-    character->movementDirection &= ~direction;
+    character->movement_direction &= ~direction;
 }
 
-void character_setCollision(Character *character,
-                            CharacterCollisionDirection direction)
+void character_set_collision(Character *character,
+                             CharacterCollisionDirection direction)
 {
     character->collisions |= direction;
 }
 
-void character_unsetCollision(Character *character,
-                              CharacterCollisionDirection direction)
+void character_unset_collision(Character *character,
+                               CharacterCollisionDirection direction)
 {
     character->collisions &= ~direction;
 }
 
-bool character_isOnGround(Character *character)
+bool character_is_on_ground(Character *character)
 {
     return character->collisions & CHARACTER_COLLISION_BOTTOM;
 }
@@ -220,15 +221,15 @@ bool character_isOnGround(Character *character)
  */
 void character_jump(Character *character)
 {
-    if (character_isOnGround(character))
-        character->velocity.y -= character->jumpStrength;
+    if (character_is_on_ground(character))
+        character->velocity.y -= character->jump_strength;
 }
 
-void character_handleKeyboardEvent(Character *character,
+void character_handle_keyboard_event(Character *character,
                                    SDL_KeyboardEvent *event)
 {
     SDL_Keycode keycode = event->keysym.sym;
-    CharacterMovementDirection movementDirection = 0;
+    CharacterMovementDirection movement_direction = 0;
     switch (keycode)
     {
         case SDLK_SPACE:
@@ -236,30 +237,30 @@ void character_handleKeyboardEvent(Character *character,
             return;
         case SDLK_d:
         case SDLK_RIGHT:
-            movementDirection = CHARACTER_MOVE_RIGHT;
+            movement_direction = CHARACTER_MOVE_RIGHT;
             break;
         case SDLK_a:
         case SDLK_LEFT:
-            movementDirection = CHARACTER_MOVE_LEFT;
+            movement_direction = CHARACTER_MOVE_LEFT;
             break;
         default:
             return;
     }
 
-    MovementFunction movementFunction = event->type == SDL_KEYDOWN
-                                            ? character_setMovement
-                                            : character_unsetMovement;
+    MovementFunction movement_function = event->type == SDL_KEYDOWN
+                                             ? character_set_movement
+                                             : character_unset_movement;
 
-    movementFunction(character, movementDirection);
+    movement_function(character, movement_direction);
 }
 
-void character_applyGravity(Character *character, float gravity)
+void character_apply_gravity(Character *character, float gravity)
 {
     character->velocity.y += gravity;
 }
 
-VecTile *character_findCollisions(const Character *character,
-                                  const VecTile tiles)
+VecTile *character_find_collisions(const Character *character,
+                                   const VecTile tiles)
 {
     VecTile *collisions = vector_create();
 
@@ -280,19 +281,19 @@ VecTile *character_findCollisions(const Character *character,
     return collisions;
 }
 
-VecTile *character_findCollisionsWithLayerTiles(const Character *character,
-                                                const VecLevelLayer layers)
+VecTile *character_find_collisions_with_layer_tiles(const Character *character,
+                                                    const VecLevelLayer layers)
 {
     VecTile *collisions = vector_create();
     for (size_t i = 0; i < vector_size(layers); i++)
     {
-        VecTile *collisionsWithCurrentLayer =
-            character_findCollisions(character, layers[i]->tiles);
+        VecTile *collisions_with_current_layer =
+            character_find_collisions(character, layers[i]->tiles);
 
         // NOLINTNEXTLINE(bugprone-sizeof-expression)
-        vector_concat(&collisions, collisionsWithCurrentLayer);
+        vector_concat(&collisions, collisions_with_current_layer);
 
-        vector_free(collisionsWithCurrentLayer);
+        vector_free(collisions_with_current_layer);
     }
 
     return collisions;

@@ -10,7 +10,7 @@
 
 typedef HASHMAP(char, TileCallbackInfo) TileCallbackHashmap;
 
-static TileCallbackHashmap tileCallbacks;
+static TileCallbackHashmap tile_callbacks;
 
 TileCallbackInfo *tile_callback_info_create(const char *name,
                                             TileCallbackType type,
@@ -35,12 +35,12 @@ void tile_callback_add(const char *name, TileCallbackType type,
 {
     TileCallbackInfo *info = tile_callback_info_create(name, type, callback);
 
-    hashmap_put(&tileCallbacks, info->name, info);
+    hashmap_put(&tile_callbacks, info->name, info);
 }
 
 void tile_callback_init()
 {
-    hashmap_init(&tileCallbacks, hashmap_hash_string, strcmp);
+    hashmap_init(&tile_callbacks, hashmap_hash_string, strcmp);
 
     tile_callback_add("", TILE_CALLBACK_NONE, tile_callback_none);
     tile_callback_add("door", TILE_CALLBACK_DOOR, tile_callback_door);
@@ -53,18 +53,18 @@ void tile_callback_cleanup()
 
     // The reason for the warning "Missing field 'iter_types' initializer" is a
     // 0 width array "not" being initialized.
-    hashmap_foreach_key_safe(key, &tileCallbacks, temp)
+    hashmap_foreach_key_safe(key, &tile_callbacks, temp)
     {
-        TileCallbackInfo *info = hashmap_remove(&tileCallbacks, key);
+        TileCallbackInfo *info = hashmap_remove(&tile_callbacks, key);
         tile_callback_info_destroy(info);
     }
 
-    hashmap_cleanup(&tileCallbacks);
+    hashmap_cleanup(&tile_callbacks);
 }
 
 const TileCallbackInfo *tile_callback_get(const char *name)
 {
-    return hashmap_get(&tileCallbacks, name);
+    return hashmap_get(&tile_callbacks, name);
 }
 
 void tile_callback_door(TileArguments *args, CallbackGameState *game_state)
@@ -88,7 +88,7 @@ void tile_callback_door(TileArguments *args, CallbackGameState *game_state)
             {
                 SDL_Log(
                     "The character interacted with the door that goes to %s",
-                    door->destinationLevel);
+                    door->destination_level);
                 return;
             }
         }
@@ -104,7 +104,7 @@ void tile_callback_none(TileArguments *, CallbackGameState *)
 
 void tile_callback_door_cleanup(struct TileCallbackDoorArgument *args)
 {
-    free(args->destinationLevel);
+    free(args->destination_level);
 }
 
 void tile_callback_args_cleanup(TileArguments *args)
