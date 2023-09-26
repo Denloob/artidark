@@ -65,7 +65,7 @@ char *concatPath(const char *path1, const char *path2, const char pathSeparator)
 }
 
 // NOTE: if you prepend a type to the enum,
-// you must modify `tileset_rowParserCallback`
+// you must modify `tileset_rowParserCallback` and `tileset_load`
 enum FieldType
 {
     FIELD_ID,
