@@ -161,6 +161,19 @@ void tileset_field_parser_callback(void *field_bytes,
             const TileCallbackInfo *callback_info =
                 tile_callback_get(command_name);
 
+            SDL_assert(callback_info != NULL &&
+                       "Tileset callback command not found");
+
+            if (callback_info == NULL) // In case asserts are off.
+            {
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                            "Command '%s' in callback '%s' was not found. "
+                            "Interpreting as command of type none.",
+                            command_name, field_str);
+
+                callback_info = tile_callback_get("");
+            }
+
             TileCallbackFunction callback = callback_info->callback;
             SDL_assert(callback != NULL);
 
