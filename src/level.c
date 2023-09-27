@@ -246,8 +246,6 @@ void levels_unload(LevelHashmap *levels)
     const char *key;
     void *temp;
 
-    // The reason for the warning "Missing field 'iter_types' initializer" is a
-    // 0 width array "not" being initialized.
     hashmap_foreach_key_safe(key, levels, temp)
     {
         Level *level = hashmap_remove(levels, key);
