@@ -7,7 +7,6 @@
 #include "renderer.h"
 #include "tile_keyboard_events.h"
 #include "utils.h"
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -73,7 +72,7 @@ int main(int argc, char *argv[])
         character_texture, (SDL_FRect){0, 0, w, h}, CHARACTER_SPEED,
         CHARACTER_JUMP_STRENGTH, SCALING_FACTOR);
 
-    LevelHashmap *levels = load_levels(level_paths, level_amount, tileset);
+    LevelHashmap *levels = levels_load(level_paths, level_amount, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
 
     Level *current_level = hashmap_get(levels, level_name);
     if (!current_level)
@@ -125,7 +124,7 @@ int main(int argc, char *argv[])
     }
 
     tile_keyboard_events_destroy(event_subscribers);
-    unload_levels(levels);
+    levels_unload(levels);
     character_destroy(character);
     tileset_destroy(tileset);
     SDL_DestroyTexture(character_texture);
@@ -158,52 +157,4 @@ void calculate_rendering_offset(const Character *character,
     new_offset->y =
         -(character_pos.y -
           SDL_clamp(on_screen_pos.y, left_boundary, right_boundary));
-}
-
-LevelHashmap *load_levels(const char **level_paths, size_t size,
-                          Tileset *tileset)
-{
-    LevelHashmap *levels = malloc(sizeof(*levels));
-    hashmap_init(levels, hashmap_hash_string, strcmp);
-
-    for (size_t i = 0; i < size; i++)
-    {
-        FILE *file = fopen(level_paths[i], "rb");
-
-        if (!file)
-            die("Opening file %s failed", level_paths[i]);
-
-        Level *level =
-            level_load(file, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
-
-        fclose(file);
-
-        int err = hashmap_put(levels, level->name, level);
-
-        if (err == -EEXIST)
-            die("Names of levels should be unique, but %s appeared more than "
-                "once",
-                level->name);
-        else if (err)
-            die("Error while loading level %s - %s", level, strerror(-err));
-    }
-
-    return levels;
-}
-
-void unload_levels(LevelHashmap *levels)
-{
-    const char *key;
-    void *temp;
-
-    // The reason for the warning "Missing field 'iter_types' initializer" is a
-    // 0 width array "not" being initialized.
-    hashmap_foreach_key_safe(key, levels, temp)
-    {
-        Level *level = hashmap_remove(levels, key);
-        level_destroy(level);
-    }
-
-    hashmap_cleanup(levels);
-    free(levels);
 }

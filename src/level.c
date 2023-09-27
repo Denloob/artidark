@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "vec.h"
 #include <csv.h>
+#include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -188,4 +189,53 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
     level_add_layer(level, layer_loading_data.current_layer);
 
     return level;
+}
+
+LevelHashmap *levels_load(const char **level_paths, size_t size,
+                          Tileset *tileset, int tile_width, int tile_height,
+                          int scaling_factor)
+{
+    LevelHashmap *levels = malloc(sizeof(*levels));
+    hashmap_init(levels, hashmap_hash_string, strcmp);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        FILE *file = fopen(level_paths[i], "rb");
+
+        if (!file)
+            die("Opening file %s failed", level_paths[i]);
+
+        Level *level =
+            level_load(file, tileset, tile_width, tile_height, scaling_factor);
+
+        fclose(file);
+
+        int err = hashmap_put(levels, level->name, level);
+
+        if (err == -EEXIST)
+            die("Names of levels should be unique, but %s appeared more than "
+                "once",
+                level->name);
+        else if (err)
+            die("Error while loading level %s - %s", level, strerror(-err));
+    }
+
+    return levels;
+}
+
+void levels_unload(LevelHashmap *levels)
+{
+    const char *key;
+    void *temp;
+
+    // The reason for the warning "Missing field 'iter_types' initializer" is a
+    // 0 width array "not" being initialized.
+    hashmap_foreach_key_safe(key, levels, temp)
+    {
+        Level *level = hashmap_remove(levels, key);
+        level_destroy(level);
+    }
+
+    hashmap_cleanup(levels);
+    free(levels);
 }

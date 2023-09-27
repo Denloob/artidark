@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL.h"
+#include "hashmap.h"
 #include "level_layer.h"
 #include "tileset.h"
 
@@ -11,6 +12,8 @@ typedef struct Level
     char *name;
     VecLevelLayer layers;
 } Level;
+
+typedef HASHMAP(char, Level) LevelHashmap;
 
 /**
  * @brief Creates a level.
@@ -58,3 +61,31 @@ void level_draw(const Level *level, SDL_Renderer *renderer, SDL_FPoint *offset);
  */
 Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
                   int tile_height, int scaling_factor);
+
+/**
+ * @brief Loads the levels stored in the given file paths using the given tileset.
+ *
+ * @param level_paths Paths to files with the level data.
+ * @see level_load
+ * @param size The size of the level_paths array.
+ * @param tileset The tileset to use.
+ * @param tile_width The width of a tile in the level (before scaling).
+ * @param tile_height The height of a tile in the level (before scaling).
+ * @param scaling_factor The scaling factor to apply to each tile.
+ * @return Dynamically allocated hashmap from level name to the level itself.
+ *
+ * @see levels_unload
+ */
+LevelHashmap *levels_load(const char **level_paths, size_t size,
+                          Tileset *tileset, int tile_width,
+                  int tile_height, int scaling_factor);
+
+/**
+ * @brief Frees and cleans up the levels hashmap, and all the levels it stores.
+ *
+ * @param levels The levels hashmap to unload.
+ *
+ * @see level_destroy
+ * @see levels_load
+ */
+void levels_unload(LevelHashmap *levels);
