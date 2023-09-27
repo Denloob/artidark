@@ -89,3 +89,14 @@ LevelHashmap *levels_load(const char **level_paths, size_t size,
  * @see levels_load
  */
 void levels_unload(LevelHashmap *levels);
+
+/**
+ * @brief Checks for collision between all the tiles in the level with the given
+ *          id (target_id) and the given hitbox.
+ *
+ * @param level The level to check for collision in.
+ * @param target_id The id of the tile to check for collision.
+ * @param hitbox The hitbox for which to check for collision.
+ * @return True if there is collision, false otherwise.
+ */
+bool level_check_for_collision(Level *level, int target_id, SDL_FRect *hitbox);

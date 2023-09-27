@@ -45,6 +45,24 @@ void level_add_layer(Level *level, LevelLayer *layer)
     vector_add(&level->layers, layer);
 }
 
+bool level_check_for_collision(Level *level, int target_id, SDL_FRect *hitbox)
+{
+    LevelLayer *level_layer;
+    vector_foreach(level_layer, level->layers)
+    {
+        vector_iter(tile, level_layer->tiles)
+        {
+            if (tile->texture_id != target_id)
+                continue;
+
+            if (SDL_HasIntersectionF(hitbox, &tile->hitbox))
+                return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * @brief Returns the index of ch in the array
  *

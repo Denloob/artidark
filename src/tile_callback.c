@@ -74,25 +74,12 @@ void tile_callback_door(TileArguments *args, CallbackGameState *game_state)
 
     Level *level = *game_state->level_ptr;
 
-    LevelLayer *level_layer;
-    vector_foreach(level_layer, level->layers)
-    {
-        vector_iter(tile, level_layer->tiles)
-        {
-            if (tile->texture_id != game_state->tile_texture_id)
-                continue;
-            SDL_FRect *character_hitbox = &game_state->character->hitbox;
-            SDL_FRect *tile_hitbox = &tile->hitbox;
+    SDL_FRect *character_hitbox = &game_state->character->hitbox;
 
-            if (SDL_HasIntersectionF(character_hitbox, tile_hitbox))
-            {
-                SDL_Log(
-                    "The character interacted with the door that goes to %s",
-                    door->destination_level);
-                return;
-            }
-        }
-    }
+    if (level_check_for_collision(level, game_state->tile_texture_id,
+                                   character_hitbox))
+        SDL_Log("The character interacted with the door that goes to %s",
+                door->destination_level);
 
     // TODO: not implemented
 }
