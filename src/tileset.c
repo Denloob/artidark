@@ -183,8 +183,10 @@ void tileset_field_parser_callback(void *field_bytes,
                                 strdup(command_args_tokens[0])};
                         break;
                     case TILE_CALLBACK_NONE:
-                        /* TODO: we probably want to raise a warning or something,
-                         * because it shouldn't have any arguments... */
+                        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                                    "The callback '%s', is of type none, but "
+                                    "there were arguments given.",
+                                    field_str);
                         break;
                 }
             }
