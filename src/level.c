@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include "csv.h"
 #include "dir.h"
 #include "level.h"
 #include "level_layer.h"
@@ -6,7 +7,6 @@
 #include "tileset.h"
 #include "utils.h"
 #include "vec.h"
-#include <csv.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
