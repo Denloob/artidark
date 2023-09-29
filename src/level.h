@@ -77,8 +77,34 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
  * @see levels_unload
  */
 LevelHashmap *levels_load(const char **level_paths, size_t size,
-                          Tileset *tileset, int tile_width,
-                  int tile_height, int scaling_factor);
+                          Tileset *tileset, int tile_width, int tile_height,
+                          int scaling_factor);
+
+/**
+ * @brief Same as levels load, but instead of level paths, gets dir path, and finds the levels inside.
+ *          The expected structure is:
+ *              levels_dir_path/
+ *              - level_group_1/
+ *              - - level_1.csv
+ *              - - level_2.csv
+ *              - - ...
+ *              - level_group_2/
+ *              - - ...
+ *              - ...
+ *
+ * @param levels_dir_path Path to the directory with the levels.
+ * @param tileset The tileset to use.
+ * @param tile_width The width of a tile in the level (before scaling).
+ * @param tile_height The height of a tile in the level (before scaling).
+ * @param scaling_factor The scaling factor to apply to each tile.
+ * @return Dynamically allocated hashmap from level name to the level itself.
+ *
+ * @see levels_unload
+ * @see levels_load
+ */
+LevelHashmap *levels_load_from_dirs(const char *levels_dir_path,
+                                    Tileset *tileset, int tile_width,
+                                    int tile_height, int scaling_factor);
 
 /**
  * @brief Frees and cleans up the levels hashmap, and all the levels it stores.

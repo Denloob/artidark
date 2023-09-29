@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include "dir.h"
 #include "level.h"
 #include "level_layer.h"
 #include "tile.h"
@@ -207,6 +208,67 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
     level_add_layer(level, layer_loading_data.current_layer);
 
     return level;
+}
+
+typedef const char *vec_const_char;
+typedef vec_const_char *vec_const_str;
+
+LevelHashmap *levels_load_from_dirs(const char *levels_dir_path,
+                                    Tileset *tileset, int tile_width,
+                                    int tile_height, int scaling_factor)
+{
+    vec_const_str level_paths = vector_create();
+
+    DIR *levels_dir = opendir(levels_dir_path);
+    if (!levels_dir)
+        die("Opening directory %s failed", levels_dir_path);
+
+    struct dirent *levels_dir_entry;
+    while ((levels_dir_entry = readdir(levels_dir)))
+    {
+        if (strcmp(levels_dir_entry->d_name, ".") == 0 ||
+            strcmp(levels_dir_entry->d_name, "..") == 0)
+            continue;
+
+        char *level_dir_path =
+            dir_get_path_to_entry(levels_dir_entry, levels_dir_path);
+
+        DIR *level_dir = opendir(level_dir_path);
+        if (!level_dir)
+            die("Opening directory %s failed", level_dir_path);
+
+        struct dirent *level_dir_entry;
+        while ((level_dir_entry = readdir(level_dir)))
+        {
+            if (strcmp(level_dir_entry->d_name, ".") == 0 ||
+                strcmp(level_dir_entry->d_name, "..") == 0)
+                continue;
+
+            const char *level_path =
+                dir_get_path_to_entry(level_dir_entry, level_dir_path);
+
+            vector_add(&level_paths, level_path);
+        }
+
+        free(level_dir_path);
+        closedir(level_dir);
+    }
+
+    closedir(levels_dir);
+
+    LevelHashmap *levels =
+        levels_load(level_paths, vector_size(level_paths), tileset, tile_width,
+                    tile_height, scaling_factor);
+
+    const char *path;
+    vector_foreach(path, level_paths)
+    {
+        free((char *)path);
+    }
+
+    vector_free(level_paths);
+
+    return levels;
 }
 
 LevelHashmap *levels_load(const char **level_paths, size_t size,

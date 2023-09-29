@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 #include "character.h"
+#include "dir.h"
 #include "hashmap.h"
 #include "level.h"
 #include "main.h"
@@ -15,8 +16,7 @@ int main(int argc, char *argv[])
     if (argc < 5)
     {
         die("Usage: %s <Character Texture Path> <Tileset Path> <Textures path> "
-            "<KeyMap path>"
-            "<Starting level name> [Level paths...]",
+            "<KeyMap path> <Starting level name> <Level dir path>",
             argv[0]);
     }
 
@@ -24,9 +24,8 @@ int main(int argc, char *argv[])
     const char *tileset_path = argv[2];
     const char *textures_dir_path = argv[3];
     const char *keymap_path = argv[4];
-    const char *level_name = argv[5];
-    const char **level_paths = (const char **)(argv + 6);
-    int level_amount = argc - 6;
+    const char *starting_level_name = argv[5];
+    const char *levels_dir_path = argv[6];
 
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
@@ -71,11 +70,12 @@ int main(int argc, char *argv[])
         character_texture, (SDL_FRect){0, 0, w, h}, CHARACTER_SPEED,
         CHARACTER_JUMP_STRENGTH, SCALING_FACTOR);
 
-    LevelHashmap *levels = levels_load(level_paths, level_amount, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
+    LevelHashmap *levels = levels_load_from_dirs(
+        levels_dir_path, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
 
-    Level *current_level = hashmap_get(levels, level_name);
+    Level *current_level = hashmap_get(levels, starting_level_name);
     if (!current_level)
-        die("Level %s not found", level_name);
+        die("Level %s not found", starting_level_name);
 
     SDL_FPoint rendering_offset = {0};
 
