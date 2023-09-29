@@ -91,8 +91,7 @@ struct LayerLoadingData
     int scaling_factor;
 };
 
-void level_field_parser_callback(void *field_bytes,
-                                 size_t _ __attribute__((unused)), void *data)
+void level_field_parser_callback(void *field_bytes, size_t, void *data)
 {
     struct LayerLoadingData *layer_loading_data = data;
 
@@ -126,7 +125,7 @@ void level_field_parser_callback(void *field_bytes,
         layer_loading_data->tile_width * layer_loading_data->scaling_factor;
 }
 
-void level_row_parser_callback(int _ __attribute__((unused)), void *data)
+void level_row_parser_callback(int, void *data)
 {
     struct LayerLoadingData *layer_loading_data = data;
     layer_loading_data->current_pos.x = 0;

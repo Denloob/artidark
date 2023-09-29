@@ -120,8 +120,7 @@ vec_str str_split(const char *str, char ch)
     return tokens;
 }
 
-void tileset_field_parser_callback(void *field_bytes,
-                                 size_t _ __attribute__((unused)), void *data)
+void tileset_field_parser_callback(void *field_bytes, size_t, void *data)
 {
     struct TilesetLoadingData *tileset_loading_data = data;
     Tileset *tileset = tileset_loading_data->tileset;
@@ -222,7 +221,7 @@ void tileset_field_parser_callback(void *field_bytes,
     tileset_loading_data->type++;
 }
 
-void tileset_row_parser_callback(int _ __attribute__((unused)), void *data)
+void tileset_row_parser_callback(int, void *data)
 {
     struct TilesetLoadingData *tileset_loading_data = data;
     vector_add(&tileset_loading_data->tileset->entries, (TilesetEntry){0});
