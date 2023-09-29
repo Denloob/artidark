@@ -72,26 +72,35 @@ extern "C" {
  *   // key_type:       const char *
  *   // data_type:      char *
  */
-#define HASHMAP(key_type, data_type)                                    \
-    struct {                                                            \
-        struct hashmap_base map_base;                                   \
-        struct {                                                        \
-            const key_type *t_key;                                      \
-            data_type *t_data;                                          \
-            size_t (*t_hash_func)(const key_type *);                    \
-            int (*t_compare_func)(const key_type *, const key_type *);  \
-            key_type *(*t_key_dup_func)(const key_type *);              \
-            void (*t_key_free_func)(key_type *);                        \
-            int (*t_foreach_func)(const key_type *, data_type *, void *); \
-            struct {                                                    \
-                struct hashmap_base *iter_map;                          \
-                struct hashmap_entry *iter_pos;                         \
-                struct {                                                \
-                    const key_type *t_key;                              \
-                    data_type *t_data;                                  \
-                } iter_types[0];                                        \
-            } t_iterator;                                               \
-        } map_types[0];                                                 \
+#define HASHMAP(key_type, data_type) HASHMAP_NAMED(, key_type, data_type)
+
+#define HASHMAP_NAMED_TYPEDEF(name, key_type, data_type)                       \
+    typedef HASHMAP_NAMED(name, key_type, data_type) name;
+
+#define HASHMAP_NAMED(name, key_type, data_type)                               \
+    struct name                                                                \
+    {                                                                          \
+        struct hashmap_base map_base;                                          \
+        struct                                                                 \
+        {                                                                      \
+            const key_type *t_key;                                             \
+            data_type *t_data;                                                 \
+            size_t (*t_hash_func)(const key_type *);                           \
+            int (*t_compare_func)(const key_type *, const key_type *);         \
+            key_type *(*t_key_dup_func)(const key_type *);                     \
+            void (*t_key_free_func)(key_type *);                               \
+            int (*t_foreach_func)(const key_type *, data_type *, void *);      \
+            struct                                                             \
+            {                                                                  \
+                struct hashmap_base *iter_map;                                 \
+                struct hashmap_entry *iter_pos;                                \
+                struct                                                         \
+                {                                                              \
+                    const key_type *t_key;                                     \
+                    data_type *t_data;                                         \
+                } iter_types[0];                                               \
+            } t_iterator;                                                      \
+        } map_types[0];                                                        \
     }
 
 /*
@@ -100,9 +109,7 @@ extern "C" {
  * Example declarations:
  *   HASHMAP_ITER(my_hashmap) iter;
  */
-#define HASHMAP_ITER(hashmap_type)                                      \
-    typeof((hashmap_type).map_types->t_iterator)
-
+#define HASHMAP_ITER(hashmap_type) typeof((hashmap_type).map_types->t_iterator)
 
 /*
  * Initialize an empty hashmap.
