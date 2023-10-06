@@ -4,6 +4,7 @@
 #include "level.h"
 #include "level_layer.h"
 #include "tile.h"
+#include "tile_classes.h"
 #include "tileset.h"
 #include "utils.h"
 #include "vec.h"
@@ -101,13 +102,14 @@ void level_field_parser_callback(void *field_bytes, size_t, void *data)
     int id = atoi(field_str);
 
     int w = 0, h = 0;
+    int class_id = 0;
     SDL_Texture *tile_texture = NULL;
     SDL_FPoint hitbox_offset = {0};
     bool solid = 0;
     TileCallback callback;
     if (tileset_query_texture_by_id(layer_loading_data->tileset, id,
                                     &tile_texture, &hitbox_offset, &solid,
-                                    &callback))
+                                    &callback, &class_id))
     {
         die("Error while loading level:\nNo texture with ID %d", id);
     }
@@ -122,7 +124,8 @@ void level_field_parser_callback(void *field_bytes, size_t, void *data)
         };
 
         Tile tile;
-        tile_init(&tile, tile_hitbox, tile_texture, callback, id, solid);
+        tile_init(&tile, tile_hitbox, tile_texture, callback, id, class_id,
+                  solid);
         level_layer_add_tile(layer_loading_data->current_layer, tile);
     }
 

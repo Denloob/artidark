@@ -10,6 +10,7 @@ typedef struct Tile
     SDL_Texture *texture;
     TileCallback callback;
     int texture_id;
+    int class_id;
     bool solid;
 } Tile;
 
@@ -24,10 +25,11 @@ typedef Tile *VecTile;
  * @param texture The texture of the tile.
  * @param callback The callback for the tile.
  * @param texture_id The id of the texture.
+ * @param class_id The class id of the tile.
  * @param solid Whether the tile is solid or not.
  */
 void tile_init(Tile *tile, SDL_FRect hitbox, SDL_Texture *texture,
-               TileCallback callback, int texture_id, bool solid);
+               TileCallback callback, int texture_id, int class_id, bool solid);
 
 // There is no clean-up as there is no memory managed by the tile.
 

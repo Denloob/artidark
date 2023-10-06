@@ -23,7 +23,7 @@
     {                                                                          \
         TileCallback *tile_callback = xmalloc(sizeof(*tile_callback));         \
         tileset_query_texture_by_id(tileset, texture_id, NULL, NULL, NULL,     \
-                                    tile_callback);                            \
+                                    tile_callback, NULL);                      \
         tile_keyboard_events_subscribe_dynamic(subscribers, key,               \
                                                tile_callback);                 \
     } while (0)

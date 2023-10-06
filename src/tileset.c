@@ -292,7 +292,7 @@ Tileset *tileset_load(FILE *stream, char *texture_dir_path,
 int tileset_query_texture_by_id(const Tileset *tileset, int id,
                                 SDL_Texture **texture,
                                 SDL_FPoint *hitbox_offset, bool *solid,
-                                TileCallback *callback)
+                                TileCallback *callback, int *class_id)
 {
     TilesetEntry *entries_end =
         tileset->entries + vector_size(tileset->entries);
@@ -307,6 +307,8 @@ int tileset_query_texture_by_id(const Tileset *tileset, int id,
                 *solid = entry->solid;
             if (callback)
                 *callback = (TileCallback){entry->callback, &entry->args, id};
+            if (class_id)
+                *class_id = entry->class_id;
             if (hitbox_offset)
                 *hitbox_offset = entry->hitbox_offset;
 

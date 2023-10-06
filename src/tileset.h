@@ -89,9 +89,10 @@ void tileset_destroy(Tileset *tileset);
  * @param[out] hitbox_offset The offset of the hitbox from tile's origin.
  * @param[out] solid Whether the tile is solid or not.
  * @param[out] callback The callback for the tile.
+ * @param[out] class_id The class id of the tile.
  * @return EXIT_SUCCESS if id exists, EXIT_FAILURE otherwise.
  */
 int tileset_query_texture_by_id(const Tileset *tileset, int id,
                                 SDL_Texture **texture,
                                 SDL_FPoint *hitbox_offset, bool *solid,
-                                TileCallback *callback);
+                                TileCallback *callback, int *class_id);
