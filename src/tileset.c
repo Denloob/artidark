@@ -75,6 +75,8 @@ enum FieldType
     FIELD_CLASS_ID,
     FIELD_SOLID,
     FIELD_CALLBACK,
+    FIELD_HITBOX_OFFSET_X,
+    FIELD_HITBOX_OFFSET_Y,
 };
 
 struct TilesetLoadingData
@@ -214,6 +216,12 @@ void tileset_field_parser_callback(void *field_bytes, size_t, void *data)
             last_entry->args = callback_args;
             break;
         }
+        case FIELD_HITBOX_OFFSET_X:
+            last_entry->hitbox_offset.x = atoi(field_str);
+            break;
+        case FIELD_HITBOX_OFFSET_Y:
+            last_entry->hitbox_offset.y = atoi(field_str);
+            break;
     }
 
     // Change type to the next field type, as the enum is in order.
@@ -282,7 +290,8 @@ Tileset *tileset_load(FILE *stream, char *texture_dir_path,
 }
 
 int tileset_query_texture_by_id(const Tileset *tileset, int id,
-                                SDL_Texture **texture, bool *solid,
+                                SDL_Texture **texture,
+                                SDL_FPoint *hitbox_offset, bool *solid,
                                 TileCallback *callback)
 {
     TilesetEntry *entries_end =
@@ -298,6 +307,8 @@ int tileset_query_texture_by_id(const Tileset *tileset, int id,
                 *solid = entry->solid;
             if (callback)
                 *callback = (TileCallback){entry->callback, &entry->args, id};
+            if (hitbox_offset)
+                *hitbox_offset = entry->hitbox_offset;
 
             return EXIT_SUCCESS;
         }

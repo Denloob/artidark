@@ -94,6 +94,7 @@ struct LayerLoadingData
 void level_field_parser_callback(void *field_bytes, size_t, void *data)
 {
     struct LayerLoadingData *layer_loading_data = data;
+    int scale_fact = layer_loading_data->scaling_factor;
 
     // Field str will be null terminated (csv_parser option)
     const char *field_str = field_bytes;
@@ -101,28 +102,32 @@ void level_field_parser_callback(void *field_bytes, size_t, void *data)
 
     int w = 0, h = 0;
     SDL_Texture *tile_texture = NULL;
+    SDL_FPoint hitbox_offset = {0};
     bool solid = 0;
     TileCallback callback;
     if (tileset_query_texture_by_id(layer_loading_data->tileset, id,
-                                    &tile_texture, &solid, &callback))
+                                    &tile_texture, &hitbox_offset, &solid,
+                                    &callback))
     {
         die("Error while loading level:\nNo texture with ID %d", id);
     }
 
     if (!SDL_QueryTexture(tile_texture, NULL, NULL, &w, &h))
     {
+        SDL_FRect tile_hitbox = {
+            layer_loading_data->current_pos.x + hitbox_offset.x * scale_fact,
+            layer_loading_data->current_pos.y + hitbox_offset.y * scale_fact,
+            w * scale_fact,
+            h * scale_fact,
+        };
+
         Tile tile;
-        tile_init(&tile,
-                  (SDL_FRect){layer_loading_data->current_pos.x,
-                              layer_loading_data->current_pos.y,
-                              w * layer_loading_data->scaling_factor,
-                              h * layer_loading_data->scaling_factor},
-                  tile_texture, callback, id, solid);
+        tile_init(&tile, tile_hitbox, tile_texture, callback, id, solid);
         level_layer_add_tile(layer_loading_data->current_layer, tile);
     }
 
     layer_loading_data->current_pos.x +=
-        layer_loading_data->tile_width * layer_loading_data->scaling_factor;
+        layer_loading_data->tile_width * scale_fact;
 }
 
 void level_row_parser_callback(int, void *data)
