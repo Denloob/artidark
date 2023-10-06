@@ -73,7 +73,10 @@ int main(int argc, char *argv[])
     LevelHashmap *levels = levels_load_from_dirs(
         levels_dir_path, tileset, TILE_SIZE, TILE_SIZE, SCALING_FACTOR);
 
-    Level *current_level = hashmap_get(levels, starting_level_name);
+    Level *current_level = NULL;
+    level_select(&current_level, levels, starting_level_name,
+                 &character->hitbox);
+
     if (!current_level)
         die("Level %s not found", starting_level_name);
 
@@ -81,6 +84,7 @@ int main(int argc, char *argv[])
 
     CallbackGameState callback_game_state = {
         .level_ptr = &current_level,
+        .levels = levels,
         .character = character,
     };
 
@@ -123,6 +127,7 @@ int main(int argc, char *argv[])
     }
 
     tile_keyboard_events_destroy(event_subscribers);
+    level_destroy(current_level);
     levels_unload(levels);
     character_destroy(character);
     tileset_destroy(tileset);

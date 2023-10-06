@@ -217,6 +217,47 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
     return level;
 }
 
+void level_select(Level **current_level_ptr, LevelHashmap *levels,
+                  const char *level_name, SDL_FRect *character_hitbox_ptr)
+{
+    SDL_assert(current_level_ptr != NULL); // Not that others arguments can be
+                                           // NULL, but this one I think is the
+                                           // most confusing out of them all.
+
+    if (*current_level_ptr)
+        level_destroy(*current_level_ptr);
+
+    *current_level_ptr = hashmap_remove(levels, level_name);
+
+    Level *level = *current_level_ptr;
+
+    /* We set player's position to the position of the first lowest tile with
+     * the class id of SPAWN_POINT */
+    float lowest_y_so_far = -INFINITY;
+    LevelLayer *layer;
+    vector_foreach(layer, level->layers)
+    {
+        vector_iter(tile, layer->tiles)
+        {
+            if (tile->class_id != TILE_CLASS_SPAWN_POINT)
+                continue;
+
+            if (tile->hitbox.y <= lowest_y_so_far)
+                continue;
+
+            lowest_y_so_far = tile->hitbox.y;
+            character_hitbox_ptr->x = tile->hitbox.x;
+            character_hitbox_ptr->y = tile->hitbox.y;
+        }
+    }
+
+    if (lowest_y_so_far == -INFINITY)
+    {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                    "No spawn point found on level %s", level_name);
+    }
+}
+
 typedef const char *vec_const_char;
 typedef vec_const_char *vec_const_str;
 

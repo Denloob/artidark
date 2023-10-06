@@ -63,6 +63,30 @@ Level *level_load(FILE *stream, const Tileset *tileset, int tile_width,
                   int tile_height, int scaling_factor);
 
 /**
+ * @brief Selects a level from a level hashmap based on its name and sets
+ *          character's position to the spawn point of the selected level.
+ *
+ * @warning The selected level will be removed from the hashmap (levels).
+ * @warning The current level (*current_level_ptr) will be destroyed if
+ *              (*current_level_ptr) is not NULL.
+ *
+ * @param current_level_ptr Pointer to the current level. The current one will
+ *                              be destroyed if it's not NULL and then will be
+ *                              replaced with the new level.
+ * @param levels Hashmap of Levels where the level to select is stored.
+ *                  The selected level will be removed from it.
+ * @param level_name The name of the level to select.
+ * @param[out] character_hitbox_ptr Pointer to character's hitbox. The x
+ *                                      and y of the hitbox will be changed to
+ *                                      match the position of the spawn point
+ *                                      on the selected level.
+ *
+ * @see level_destroy
+ */
+void level_select(Level **current_level_ptr, LevelHashmap *levels,
+                  const char *level_name, SDL_FRect *character_hitbox_ptr);
+
+/**
  * @brief Loads the levels stored in the given file paths using the given tileset.
  *
  * @param level_paths Paths to files with the level data.
