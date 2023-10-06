@@ -43,7 +43,7 @@ void tile_callback_init()
     hashmap_init(&tile_callbacks, hashmap_hash_string, strcmp);
 
     tile_callback_add("", TILE_CALLBACK_NONE, tile_callback_none);
-    tile_callback_add("door", TILE_CALLBACK_DOOR, tile_callback_door);
+    tile_callback_add("ladder", TILE_CALLBACK_LADDER, tile_callback_ladder);
 }
 
 void tile_callback_cleanup()
@@ -65,21 +65,39 @@ const TileCallbackInfo *tile_callback_get(const char *name)
     return hashmap_get(&tile_callbacks, name);
 }
 
-void tile_callback_door(TileArguments *args, CallbackGameState *game_state)
+void tile_callback_ladder(TileArguments *args, CallbackGameState *game_state)
 {
-    SDL_assert(args->type == TILE_CALLBACK_DOOR);
-    struct TileCallbackDoorArgument *door = &args->door;
+    SDL_assert(args->type == TILE_CALLBACK_LADDER);
 
     Level *level = *game_state->level_ptr;
 
     SDL_FRect *character_hitbox = &game_state->character->hitbox;
 
-    if (level_check_for_collision(level, game_state->tile_texture_id,
+    if (!level_check_for_collision(level, game_state->tile_texture_id,
                                    character_hitbox))
-        SDL_Log("The character interacted with the door that goes to %s",
-                door->destination_level);
+        return;
 
-    // TODO: not implemented
+    size_t level_amount = hashmap_size(game_state->levels);
+
+    // TODO: in this case, we want to set to the final level or to level
+    //       crossing.
+    SDL_assert(level_amount > 0 && "Not supported yet.");
+
+    size_t level_idx = rand() % level_amount;
+
+    const char *level_name;
+    hashmap_foreach_key(level_name, game_state->levels)
+    {
+        if (level_idx != 0)
+        {
+            level_idx--;
+            continue;
+        }
+
+        level_select(game_state->level_ptr, game_state->levels, level_name,
+                     &game_state->character->hitbox);
+        break;
+    }
 }
 
 void tile_callback_none(TileArguments *, CallbackGameState *)
@@ -87,18 +105,13 @@ void tile_callback_none(TileArguments *, CallbackGameState *)
     /* Does nothing. */
 }
 
-void tile_callback_door_cleanup(struct TileCallbackDoorArgument *args)
-{
-    free(args->destination_level);
-}
-
 void tile_callback_args_cleanup(TileArguments *args)
 {
     switch (args->type)
     {
         case TILE_CALLBACK_NONE:
+        case TILE_CALLBACK_LADDER:
+            /* Nothing to cleanup */
             break;
-        case TILE_CALLBACK_DOOR:
-            tile_callback_door_cleanup(&args->door);
     }
 }

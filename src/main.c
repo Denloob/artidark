@@ -10,6 +10,7 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
             "<KeyMap path> <Starting level name> <Level dir path>",
             argv[0]);
     }
+    srand(time(NULL));
 
     const char *character_texture_path = argv[1];
     const char *tileset_path = argv[2];

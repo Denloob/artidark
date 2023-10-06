@@ -190,13 +190,8 @@ void tileset_field_parser_callback(void *field_bytes, size_t, void *data)
 
                 switch (callback_info->type)
                 {
-                    case TILE_CALLBACK_DOOR:
-                        SDL_assert(command_args_tokens_size == 1);
-                        callback_args.door = (struct TileCallbackDoorArgument){
-                            .destination_level =
-                                strdup(command_args_tokens[0])};
-                        break;
                     case TILE_CALLBACK_NONE:
+                    case TILE_CALLBACK_LADDER:
                         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                                     "The command '%s' has no arguments, but "
                                     "they were given in callback '%s'.",

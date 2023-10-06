@@ -1,27 +1,28 @@
 #pragma once
 
 #include "SDL_keycode.h"
+
 typedef enum TileCallbackType
 {
     TILE_CALLBACK_NONE,
-    TILE_CALLBACK_DOOR
+    TILE_CALLBACK_LADDER,
 } TileCallbackType;
 
-struct TileCallbackDoorArgument
+struct TileCallbackLadderArgument
 {
-    TileCallbackType type;   // TILE_CALLBACK_DOOR
-    char *destination_level; // The name of the level where this door leads too.
+    TileCallbackType type; // TILE_CALLBACK_LADDER
 };
 
 typedef union TileArguments
 {
     TileCallbackType type;
-    struct TileCallbackDoorArgument door;
+    struct TileCallbackLadderArgument ladder;
 } TileArguments;
 
 typedef struct CallbackGameState
 {
     struct Character *character;
+    struct LevelHashmap *levels;
     struct Level **level_ptr;
     SDL_Keycode key;     // Key that triggered the call
     int tile_texture_id; // The id of the tile for the event
@@ -76,23 +77,16 @@ void tile_callback_args_cleanup(TileArguments *args);
 const TileCallbackInfo *tile_callback_get(const char *name);
 
 /**
- * @brief Called when a door event is triggered
+ * @brief Called when a ladder event is triggered
  *
- * @param args Union with struct DoorArgument set.
+ * @param args Union with struct LadderArgument set.
  * @param game_state The current state of the game.
  *
  * @see tile_callback_get
  */
-void tile_callback_door(TileArguments *args, CallbackGameState *game_state);
+void tile_callback_ladder(TileArguments *args, CallbackGameState *game_state);
 
 /**
  * @brief Does nothing
  */
 void tile_callback_none(TileArguments *, CallbackGameState *);
-
-/**
- * @brief Cleans up memory used by the door callback arguments.
- *
- * @param args The callback arguments to clean up.
- */
-void tile_callback_door_cleanup(struct TileCallbackDoorArgument *args);
