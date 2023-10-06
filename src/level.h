@@ -13,7 +13,7 @@ typedef struct Level
     VecLevelLayer layers;
 } Level;
 
-typedef HASHMAP(char, Level) LevelHashmap;
+HASHMAP_NAMED_TYPEDEF(LevelHashmap, char, Level)
 
 /**
  * @brief Creates a level.
